@@ -26,14 +26,6 @@ public class Manager {
         return nextId++;
     }
 
-
-    public void clearTasks() {
-        tasks.clear();
-        epicTasks.clear();
-        subtasks.clear();
-        nextId = 0;
-    }
-
     public Subtask getSubtaskById(int id) {
         if (subtasks.containsKey(id)) {
             for (Subtask subtask : subtasks.values()) {
