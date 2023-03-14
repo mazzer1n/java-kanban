@@ -7,13 +7,14 @@ import tasks.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 
 public class Manager {
     private int nextId;
-    HashMap<Integer, Subtask> subtasks;
-    HashMap<Integer, Epic> epicTasks;
-    HashMap<Integer, Task> tasks;
+    private HashMap<Integer, Subtask> subtasks;
+    private HashMap<Integer, Epic> epicTasks;
+    private HashMap<Integer, Task> tasks;
 
     public Manager() {
         this.nextId = 0;
@@ -27,36 +28,15 @@ public class Manager {
     }
 
     public Subtask getSubtaskById(int id) {
-        if (subtasks.containsKey(id)) {
-            for (Subtask subtask : subtasks.values()) {
-                if (subtask.getId() == id) {
-                    return subtask;
-                }
-            }
-        }
-        return null;
+        return subtasks.get(id);
     }
 
     public Task getTaskById(int id) {
-        if (tasks.containsKey(id)) {
-            for (Task task : tasks.values()) {
-                if (task.getId() == id) {
-                    return task;
-                }
-            }
-        }
-        return null;
+        return tasks.get(id);
     }
 
     public Epic getEpicById(int id) {
-        if (epicTasks.containsKey(id)) {
-            for (Epic epic : epicTasks.values()) {
-                if (epic.getId() == id) {
-                    return epic;
-                }
-            }
-        }
-        return null;
+        return epicTasks.get(id);
     }
 
     public void addTask(Task task) {
@@ -69,11 +49,10 @@ public class Manager {
         epicTasks.put(epic.getId(), epic);
     }
 
-    public void addSubtask(Subtask subtask, Epic epic) {
+    public void addSubtask(Subtask subtask) {
         subtask.setId(generateId());
-        subtask.setEpicId(epic.getId());
         subtasks.put(subtask.getId(), subtask);
-        updateEpicStatus(epic);
+        updateEpicStatus(epicTasks.get(subtask.getEpicId()));
     }
 
     public void updateSubtask(Subtask subtask) {
@@ -88,6 +67,15 @@ public class Manager {
         tasks.put(task.getId(), task);
     }
 
+    public void updateEpic(Epic epic) {
+        for (Subtask subtask : subtasks.values()) {
+            if (subtask.getEpicId() == epic.getId()) {
+                return;
+            }
+        }
+        epicTasks.put(epic.getId(), epic);
+    }
+
     public void deleteTaskById(int id) {
         tasks.remove(id);
     }
@@ -100,9 +88,10 @@ public class Manager {
     }
 
     public void deleteEpicById(int id) {
-        Iterator<Subtask> iterator = subtasks.values().iterator();
+        Iterator<Map.Entry<Integer, Subtask>> iterator = subtasks.entrySet().iterator();
         while (iterator.hasNext()) {
-            Subtask subtask = iterator.next();
+            Map.Entry<Integer, Subtask> entry = iterator.next();
+            Subtask subtask = entry.getValue();
             if (subtask.getEpicId() == id) {
                 iterator.remove();
             }
@@ -112,29 +101,30 @@ public class Manager {
 
     private void updateEpicStatus(Epic epic) {
         int statusNew = 0;
-        int statusProgress = 0;
+        int statusInProgress = 0;
         int statusDone = 0;
-        int counter = 0;
         int epicId = epic.getId();
+        int subtaskCount = 0;
 
         for (Subtask subtask : subtasks.values()) {
             if (subtask.getEpicId() == epicId) {
                 if (subtask.getStatus().equals("NEW")) {
                     ++statusNew;
                 } else if (subtask.getStatus().equals("IN_PROGRESS")) {
-                    ++statusProgress;
-                } else {
+                    ++statusInProgress;
+                } else if (subtask.getStatus().equals("DONE")) {
                     ++statusDone;
                 }
-                ++counter;
+                ++subtaskCount;
             }
         }
-        if (statusNew != counter && statusDone != counter) {
-            epic.setStatus("IN_PROGRESS");
-        } else if (statusDone == counter && statusDone != 0) {
-            epic.setStatus("DONE");
-        } else if (counter == 0) {
+
+        if (statusNew == subtaskCount) {
             epic.setStatus("NEW");
+        } else if (statusDone == subtaskCount) {
+            epic.setStatus("DONE");
+        } else {
+            epic.setStatus("IN_PROGRESS");
         }
         epicTasks.put(epic.getId(), epic);
     }
@@ -161,16 +151,20 @@ public class Manager {
         return subtasksOfEpic;
     }
 
-    public void clearTask() {
+    public void clearTasks() {
         tasks.clear();
     }
 
-    public void clearSubtask() {
+    public void clearSubtasks() {
         subtasks.clear();
+        for (Epic epic : epicTasks.values()) {
+            epic.setStatus("NEW");
+        }
     }
 
     public void clearEpic() {
         epicTasks.clear();
+        subtasks.clear();
     }
 
 }
