@@ -2,17 +2,17 @@ package tasks;
 
 public class Task {
     protected String name;
-    protected String status;
+    protected Status status;
     protected String description;
     protected int id;
 
-    public Task(String name, String description, String status) {
+    public Task(String name, String description, Status status) {
         this.name = name;
         this.status = status;
         this.description = description;
     }
 
-    public Task(String name, String description, String status, int id) {
+    public Task(String name, String description, Status status, int id) {
         this(name, description, status);
         this.id = id;
     }
@@ -25,11 +25,11 @@ public class Task {
         this.name = name;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
