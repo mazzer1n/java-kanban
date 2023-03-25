@@ -43,9 +43,6 @@ public interface TaskManager {
     public void deleteEpicById(int id);
 
 
-    public void updateEpicStatus(Epic epic);
-
-
     public ArrayList<Task> getTaskList();
 
 
