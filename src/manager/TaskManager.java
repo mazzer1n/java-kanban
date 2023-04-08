@@ -52,7 +52,7 @@ public interface TaskManager {
     public ArrayList<Subtask> getSubtaskList();
 
 
-    public ArrayList<Subtask> getSubtaskOfEpic(Epic epic);
+    public ArrayList<Subtask> getSubtasksOfEpic(Epic epic);
 
 
     public void clearTasks();
