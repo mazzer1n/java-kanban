@@ -21,7 +21,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    private final HashMap<Integer, Node> history = new HashMap<>(); // эта залупа пустая
+    private final HashMap<Integer, Node> history = new HashMap<>();
     Node<Task> head;
     Node<Task> tail;
 
