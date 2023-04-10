@@ -6,8 +6,7 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.ArrayList;
 
 
@@ -71,28 +70,34 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        subtasks.put(subtask.getId(), subtask);
+        Subtask saved = subtasks.get(subtask.getId());
+        saved.setName(subtask.getName());
+        saved.setStatus(subtask.getStatus());                   //
+        saved.setDescription(subtask.getDescription());
         final Epic epic = epics.get(subtask.getEpicId());
-        if (epic != null) {
-            updateEpicStatus(epic);
-        }
+        updateEpicStatus(epic);
+
     }
 
     @Override
     public void updateTask(Task task) {
-        tasks.put(task.getId(), task);
+        Task saved = tasks.get(task.getId());
+        saved.setName(task.getName());
+        saved.setStatus(task.getStatus());
+        saved.setDescription(task.getDescription());
     }
 
     @Override
     public void updateEpic(Epic epic) {
-        final Epic currentEpic = epics.get(epic.getId());
-        currentEpic.setName(epic.getName());
-        currentEpic.setDescription(epic.getDescription());
+        final Epic saved = epics.get(epic.getId());
+        saved.setName(epic.getName());
+        saved.setDescription(epic.getDescription());
     }
 
     @Override
     public void deleteTaskById(int id) {
         tasks.remove(id);
+        historyManager.remove(id);
     }
 
     @Override
@@ -102,19 +107,18 @@ public class InMemoryTaskManager implements TaskManager {
         epic.deleteSubtaskId(id);
         subtasks.remove(id);
         updateEpicStatus(epic);
+        historyManager.remove(id);
     }
 
     @Override
     public void deleteEpicById(int id) {
-        final Iterator<Map.Entry<Integer, Subtask>> iterator = subtasks.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Map.Entry<Integer, Subtask> entry = iterator.next();
-            final Subtask subtask = entry.getValue();
-            if (subtask.getEpicId() == id) {
-                iterator.remove();
-            }
-        }
+        Epic epic = epics.get(id);
+
+        for (Integer subtaskId : epic.getSubtasksId())
+            subtasks.remove(subtaskId);
+
         epics.remove(id);
+        historyManager.remove(id);
     }
 
     private void updateEpicStatus(Epic epic) {
@@ -163,34 +167,51 @@ public class InMemoryTaskManager implements TaskManager {
     public ArrayList<Subtask> getSubtasksOfEpic(Epic epic) {
         final ArrayList<Subtask> subtasksOfEpic = new ArrayList<>();
         for (Subtask subtask : subtasks.values()) {
-            if (subtask.getEpicId() == epic.getId()) {
+            if (subtask.getEpicId() == epic.getId())
                 subtasksOfEpic.add(subtask);
-            }
         }
         return subtasksOfEpic;
     }
 
     @Override
     public void clearTasks() {
+        for (Task task : tasks.values())
+            historyManager.remove(task.getId());
+
         tasks.clear();
     }
 
     @Override
     public void clearSubtasks() {
+        if (!epics.isEmpty()) {
+            for (Epic epic : epics.values()) {
+                epic.setStatus(Status.NEW);
+                epic.clearSubtasksId();
+            }
+        }
+
+        for (Integer subtaskId : subtasks.keySet())
+            historyManager.remove(subtaskId);
+
         subtasks.clear();
 
-        for (Epic epic : epics.values()) {
-            epic.setStatus(Status.NEW);
-            epic.clearSubtasksId();
-        }
     }
 
     @Override
     public void clearEpic() {
+        for (Integer epicId : epics.keySet())
+            historyManager.remove(epicId);
+
         epics.clear();
-        subtasks.clear();
+        clearSubtasks();
     }
-//,jbjk
+
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+    public void removeHistory(int id) {
+        historyManager.remove(id);
+    }
 }
 
 

@@ -27,4 +27,7 @@ public class Epic extends Task {
         subtasksId.clear();
     }
 
+    public List<Integer> getSubtasksId() {
+        return subtasksId;
+    }
 }
