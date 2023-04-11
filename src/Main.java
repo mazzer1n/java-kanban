@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        /*TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = Managers.getDefault();
 
 
         Task task1 = new Task("name1", "description1", Status.NEW);
@@ -23,28 +23,29 @@ public class Main {
         taskManager.addEpic(epic1);
         taskManager.addEpic(epic2);
 
-        System.out.println(task1.getId()); //id = 0
-        System.out.println(task2.getId()); //id = 1
-        System.out.println(epic1.getId()); //id = 2
-        System.out.println(epic2.getId()); //id = 3
+        System.out.println(task1.getId()); //id = 1
+        System.out.println(task2.getId()); //id = 2
+        System.out.println(epic1.getId()); //id = 3
+        System.out.println(epic2.getId()); //id = 4
 
-        Subtask subtask11 = new Subtask("subtask11", "descriptionSubtask11", Status.NEW, 2);
-        Subtask subtask12 = new Subtask("subtask12", "descriptionSubtask12", Status.NEW, 2);
-        Subtask subtask13 = new Subtask("subtask13", "descriptionSubtask13", Status.NEW, 2);
+        Subtask subtask11 = new Subtask("subtask11", "descriptionSubtask11", Status.NEW, 3);
+        Subtask subtask12 = new Subtask("subtask12", "descriptionSubtask12", Status.NEW, 3);
+        Subtask subtask13 = new Subtask("subtask13", "descriptionSubtask13", Status.NEW, 3);
 
-        taskManager.addSubtask(subtask11); //4
-        taskManager.addSubtask(subtask12); //5
-        taskManager.addSubtask(subtask13);//6
+        taskManager.addSubtask(subtask11); //5
+        taskManager.addSubtask(subtask12); //6
+        taskManager.addSubtask(subtask13);//7
 
-        taskManager.getSubtaskById(4);
-        taskManager.getTaskById(0);
+        taskManager.getSubtaskById(5);
+        taskManager.getTaskById(1);
         taskManager.getEpicById(3);
-        taskManager.getSubtaskById(4);
-        taskManager.getEpicById(3);
+        taskManager.getSubtaskById(6);
+        taskManager.getEpicById(4);
+        taskManager.deleteEpicById(3);
+
         System.out.println(taskManager.getHistory());
-        taskManager.removeHistory(3);
         System.out.println(taskManager.getHistory());
 
-         */
+
     }
 }
