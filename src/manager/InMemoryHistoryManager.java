@@ -9,12 +9,12 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private static class Node<Task> {
+    private static class Node {
         Task item;
         Node next;
         Node prev;
 
-        Node(Node<Task> prev, Task element, Node<Task> next) {
+        Node(Node prev, Task element, Node next) {
             this.item = element;
             this.next = next;
             this.prev = prev;
@@ -22,11 +22,12 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     private final HashMap<Integer, Node> history = new HashMap<>();
-    Node<Task> head;
-    Node<Task> tail;
+    Node head;
+    Node tail;
 
     @Override
     public void add(Task task) {
+        if (task == null) return;
         remove(task.getId());
         linkLast(task);
     }
@@ -40,8 +41,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        ArrayList<Task> list = new ArrayList<>();
-        Node<Task> current = head;
+        final ArrayList<Task> list = new ArrayList<>();
+        Node current = head;
 
         while (current != null) {
             list.add(current.item);
@@ -63,6 +64,8 @@ public class InMemoryHistoryManager implements HistoryManager {
             head = next;
             if (head != null) {
                 head.prev = null;
+            } else {
+                tail = null;
             }
         } else {
             prev.next = next;
@@ -72,6 +75,8 @@ public class InMemoryHistoryManager implements HistoryManager {
             tail = prev;
             if (tail != null) {
                 tail.next = null;
+            } else {
+                head = null;
             }
         } else {
             next.prev = prev;
@@ -80,8 +85,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
 
     private void linkLast(Task element) {
-        final Node<Task> oldTail = tail;
-        final Node<Task> newNode = new Node<>(oldTail, element, null);
+        final Node oldTail = tail;
+        final Node newNode = new Node(oldTail, element, null);
         tail = newNode;
 
         if (oldTail == null) {
