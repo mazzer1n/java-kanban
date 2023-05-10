@@ -11,11 +11,11 @@ import java.util.ArrayList;
 
 
 public class InMemoryTaskManager implements TaskManager {
-    private int nextId;
-    private final HashMap<Integer, Subtask> subtasks;
-    private final HashMap<Integer, Epic> epics;
-    private final HashMap<Integer, Task> tasks;
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected int nextId;
+    protected final HashMap<Integer, Subtask> subtasks;
+    protected final HashMap<Integer, Epic> epics;
+    protected final HashMap<Integer, Task> tasks;
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
 
     public InMemoryTaskManager() {
@@ -25,7 +25,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks = new HashMap<>();
     }
 
-    private int generateId() {
+    protected int generateId() {
         return nextId++ + 1;
     }
 
