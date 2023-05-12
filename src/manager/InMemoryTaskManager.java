@@ -76,7 +76,6 @@ public class InMemoryTaskManager implements TaskManager {
         saved.setDescription(subtask.getDescription());
         final Epic epic = epics.get(subtask.getEpicId());
         updateEpicStatus(epic);
-
     }
 
     @Override

@@ -5,6 +5,7 @@ public class Task {
     protected Status status;
     protected String description;
     protected int id;
+    protected TypeTask typeTask = TypeTask.TASK;
 
     public Task(String name, String description, Status status) {
         this.name = name;
@@ -47,6 +48,10 @@ public class Task {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public TypeTask getTypeTask() {
+        return typeTask;
     }
 
     @Override
