@@ -3,6 +3,7 @@ package manager;
 import tasks.*;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TaskService {
@@ -53,11 +54,16 @@ public class TaskService {
     }
 
     protected static List<Integer> historyFromString(String value) {
-        return null;
+        String[] split = value.split(",");
+        List<Integer> history = new ArrayList<>();
+        for (String s : split) {
+            history.add(Integer.parseInt(s));
+        }
+        return history;
     }
 
-    protected static FileBackedTasksManager loadFromFile(File file) {
-
+    public static FileBackedTasksManager loadFromFile(File file) {
+         return new FileBackedTasksManager(file,true);
     }
 
 }

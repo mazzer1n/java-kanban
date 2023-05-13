@@ -1,53 +1,55 @@
 package manager;
 
+import exception.ManagerSaveException;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public interface TaskManager {
-    public Subtask getSubtaskById(int id);
+    Subtask getSubtaskById(int id);
 
-    public Task getTaskById(int id);
+    Task getTaskById(int id);
 
-    public Epic getEpicById(int id);
+    Epic getEpicById(int id);
 
-    public void addTask(Task task);
+    void addTask(Task task) throws ManagerSaveException;
 
-    public void addEpic(Epic epic);
+    void addEpic(Epic epic) throws ManagerSaveException;
 
-    public void addSubtask(Subtask subtask);
+    void addSubtask(Subtask subtask) throws ManagerSaveException;
 
-    public void updateSubtask(Subtask subtask);
+    void updateSubtask(Subtask subtask) throws ManagerSaveException;
 
-    public void updateTask(Task task);
+    void updateTask(Task task) throws ManagerSaveException;
 
-    public void updateEpic(Epic epic);
+    void updateEpic(Epic epic) throws ManagerSaveException;
 
-    public void deleteTaskById(int id);
+    void deleteTaskById(int id) throws ManagerSaveException;
 
-    public void deleteSubtaskById(int id);
+    void deleteSubtaskById(int id) throws ManagerSaveException;
 
-    public void deleteEpicById(int id);
+    void deleteEpicById(int id) throws ManagerSaveException;
 
-    public ArrayList<Task> getTaskList();
+    ArrayList<Task> getTaskList();
 
-    public ArrayList<Epic> getEpicList();
+    ArrayList<Epic> getEpicList();
 
-    public ArrayList<Subtask> getSubtaskList();
+    ArrayList<Subtask> getSubtaskList();
 
-    public ArrayList<Subtask> getSubtasksOfEpic(Epic epic);
+    ArrayList<Subtask> getSubtasksOfEpic(Epic epic);
 
-    public void clearTasks();
+    void clearTasks() throws IOException;
 
-    public void clearSubtasks();
+    void clearSubtasks() throws IOException;
 
-    public void clearEpics();
+    void clearEpics() throws IOException;
 
-    public List<Task> getHistory();
+    List<Task> getHistory();
 
 }
 

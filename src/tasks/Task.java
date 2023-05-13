@@ -1,6 +1,7 @@
 package tasks;
 
 public class Task {
+    private int value = 5;
     protected String name;
     protected Status status;
     protected String description;
@@ -20,6 +21,9 @@ public class Task {
 
     public String getName() {
         return name;
+    }
+    public void setValue(int value) {
+        this.value = value;
     }
 
     public void setName(String name) {
