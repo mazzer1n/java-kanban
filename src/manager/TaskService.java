@@ -1,5 +1,6 @@
 package manager;
 
+import exception.ManagerRecoveryException;
 import tasks.*;
 
 import java.io.File;
@@ -10,7 +11,7 @@ public class TaskService {
     public TaskService() {}
     protected static Task fromString(String value) {
         String[] split = value.split(",");
-        TypeTask typeTask = TypeTask.valueOf(split[0]);
+        TypeTask typeTask = TypeTask.valueOf(split[1]);
         switch (typeTask) {
             case SUBTASK:
                 Subtask subtask = new Subtask(split[2],split[4], Status.valueOf(split[3]),
@@ -62,7 +63,7 @@ public class TaskService {
         return history;
     }
 
-    public static FileBackedTasksManager loadFromFile(File file) {
+    public static FileBackedTasksManager loadFromFile(File file) throws ManagerRecoveryException {
          return new FileBackedTasksManager(file,true);
     }
 

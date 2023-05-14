@@ -11,11 +11,11 @@ import java.util.List;
 
 
 public interface TaskManager {
-    Subtask getSubtaskById(int id);
+    Subtask getSubtaskById(int id) throws ManagerSaveException;
 
-    Task getTaskById(int id);
+    Task getTaskById(int id) throws ManagerSaveException;
 
-    Epic getEpicById(int id);
+    Epic getEpicById(int id) throws ManagerSaveException;
 
     void addTask(Task task) throws ManagerSaveException;
 

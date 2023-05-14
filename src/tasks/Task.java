@@ -6,12 +6,13 @@ public class Task {
     protected Status status;
     protected String description;
     protected int id;
-    protected TypeTask typeTask = TypeTask.TASK;
+    protected TypeTask typeTask;
 
     public Task(String name, String description, Status status) {
         this.name = name;
         this.status = status;
         this.description = description;
+        typeTask = TypeTask.TASK;
     }
 
     public Task(String name, String description, Status status, int id) {
