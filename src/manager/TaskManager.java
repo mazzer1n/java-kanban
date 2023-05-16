@@ -11,29 +11,29 @@ import java.util.List;
 
 
 public interface TaskManager {
-    Subtask getSubtaskById(int id) throws ManagerSaveException;
+    Subtask getSubtaskById(int id);
 
-    Task getTaskById(int id) throws ManagerSaveException;
+    Task getTaskById(int id);
 
-    Epic getEpicById(int id) throws ManagerSaveException;
+    Epic getEpicById(int id);
 
-    void addTask(Task task) throws ManagerSaveException;
+    void addTask(Task task);
 
-    void addEpic(Epic epic) throws ManagerSaveException;
+    void addEpic(Epic epic);
 
-    void addSubtask(Subtask subtask) throws ManagerSaveException;
+    void addSubtask(Subtask subtask);
 
-    void updateSubtask(Subtask subtask) throws ManagerSaveException;
+    void updateSubtask(Subtask subtask);
 
-    void updateTask(Task task) throws ManagerSaveException;
+    void updateTask(Task task);
 
-    void updateEpic(Epic epic) throws ManagerSaveException;
+    void updateEpic(Epic epic);
 
-    void deleteTaskById(int id) throws ManagerSaveException;
+    void deleteTaskById(int id);
 
-    void deleteSubtaskById(int id) throws ManagerSaveException;
+    void deleteSubtaskById(int id);
 
-    void deleteEpicById(int id) throws ManagerSaveException;
+    void deleteEpicById(int id);
 
     ArrayList<Task> getTaskList();
 
@@ -43,11 +43,11 @@ public interface TaskManager {
 
     ArrayList<Subtask> getSubtasksOfEpic(Epic epic);
 
-    void clearTasks() throws IOException;
+    void clearTasks();
 
-    void clearSubtasks() throws IOException;
+    void clearSubtasks();
 
-    void clearEpics() throws IOException;
+    void clearEpics();
 
     List<Task> getHistory();
 

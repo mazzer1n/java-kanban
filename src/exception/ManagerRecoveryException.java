@@ -2,7 +2,7 @@ package exception;
 
 import java.io.IOException;
 
-public class ManagerRecoveryException extends IOException {
+public class ManagerRecoveryException extends RuntimeException {
     public ManagerRecoveryException() {
 
     }
