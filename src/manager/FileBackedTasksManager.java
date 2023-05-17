@@ -194,7 +194,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                     Task task = TaskService.fromString(str);
                     int id = task.getId();
-                    super.nextId = id;
+                    super.generateId();
                     if (task.getTypeTask() == TypeTask.TASK) {
                         tasks.put(id, task);
                     } else if (task.getTypeTask() == TypeTask.EPIC) {
@@ -223,6 +223,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         fileBackedTasksManager.getSubtaskById(3);
         FileBackedTasksManager manager2 = TaskService.loadFromFile(file);
         manager2.addEpic(new Epic("nameEpic2","decription2"));
+        manager2.addSubtask(new Subtask("nameSub1","description1",Status.IN_PROGRESS,4));
 
     }
 
