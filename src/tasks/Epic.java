@@ -1,5 +1,6 @@
 package tasks;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,5 +32,11 @@ public class Epic extends Task {
 
     public List<Integer> getSubtasksId() {
         return subtasksId;
+    }
+
+    @Override
+    public Instant getEndTime() {
+
+        return startTime.plusSeconds(duration * 60L);
     }
 }

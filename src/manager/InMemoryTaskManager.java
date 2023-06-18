@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Optional;
 
 
 public class InMemoryTaskManager implements TaskManager {
@@ -53,6 +54,7 @@ public class InMemoryTaskManager implements TaskManager {
         tasks.put(task.getId(), task);
     }
 
+
     @Override
     public void addEpic(Epic epic) {
         epic.setId(generateId());
@@ -60,7 +62,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void addSubtask(Subtask subtask) {
+    public void addSubtask(Subtask subtask) { //здесь можно поменять и не хранить id
         subtask.setId(generateId());
         final Epic epic = epics.get(subtask.getEpicId());
         epic.addSubtask(subtask.getId());
@@ -204,6 +206,7 @@ public class InMemoryTaskManager implements TaskManager {
         epics.clear();
         clearSubtasks();
     }
+
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();

@@ -1,5 +1,7 @@
 package tasks;
 
+import java.time.Instant;
+
 public class Task {
     private int value = 5;
     protected String name;
@@ -7,6 +9,8 @@ public class Task {
     protected String description;
     protected int id;
     protected TypeTask typeTask;
+    protected Instant startTime;
+    protected int duration;
 
     public Task(String name, String description, Status status) {
         this.name = name;
@@ -18,6 +22,13 @@ public class Task {
     public Task(String name, String description, Status status, int id) {
         this(name, description, status);
         this.id = id;
+    }
+
+    public Task(String name, String description, Status status, int id, Instant startTime, int duration) {
+        this(name, description, status);
+        this.id = id;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public String getName() {
@@ -57,6 +68,10 @@ public class Task {
 
     public TypeTask getTypeTask() {
         return typeTask;
+    }
+
+    public Instant getEndTime() {
+        return startTime.plusSeconds(duration * 60);
     }
 
     @Override
