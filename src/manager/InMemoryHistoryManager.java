@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
 public class InMemoryHistoryManager implements HistoryManager {
 
     private static class Node {
@@ -22,8 +21,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     private final HashMap<Integer, Node> history = new HashMap<>();
-    Node head;
-    Node tail;
+    private Node head;
+    private Node tail;
 
     @Override
     public void add(Task task) {
@@ -32,11 +31,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         linkLast(task);
     }
 
-
     @Override
     public void remove(int id) {
-        Node node = history.remove(id);
-        removeNode(node);
+        Node node = history.get(id);
+        if (node != null) {
+            removeNode(node);
+            history.remove(id);
+        }
     }
 
     @Override
@@ -52,37 +53,32 @@ public class InMemoryHistoryManager implements HistoryManager {
         return list;
     }
 
+    public void clear() {
+        history.clear();
+        head = null;
+        tail = null;
+    }
+
 
     private void removeNode(Node node) {
-        if (node == null)
-            return;
-
         Node prev = node.prev;
         Node next = node.next;
 
         if (prev == null) {
             head = next;
-            if (head != null) {
-                head.prev = null;
-            } else {
-                tail = null;
-            }
         } else {
             prev.next = next;
         }
 
         if (next == null) {
             tail = prev;
-            if (tail != null) {
-                tail.next = null;
-            } else {
-                head = null;
-            }
         } else {
             next.prev = prev;
         }
-    }
 
+        node.prev = null;
+        node.next = null;
+    }
 
     private void linkLast(Task element) {
         final Node oldTail = tail;
@@ -97,5 +93,5 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         history.put(newNode.item.getId(), newNode);
     }
-
 }
+

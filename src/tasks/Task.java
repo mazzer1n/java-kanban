@@ -1,6 +1,8 @@
 package tasks;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 public class Task {
     private int value = 5;
@@ -9,8 +11,8 @@ public class Task {
     protected String description;
     protected int id;
     protected TypeTask typeTask;
-    protected Instant startTime;
-    protected int duration;
+    protected Instant startTime = Instant.now();
+    protected int duration = 0;
 
     public Task(String name, String description, Status status) {
         this.name = name;
@@ -24,11 +26,15 @@ public class Task {
         this.id = id;
     }
 
-    public Task(String name, String description, Status status, int id, Instant startTime, int duration) {
+    public Task(String name, String description, Status status, Instant startTime, int duration) {
         this(name, description, status);
-        this.id = id;
         this.startTime = startTime;
         this.duration = duration;
+    }
+
+    public Task(String name, String description, Status status, int id, Instant startTime, int duration) {
+        this(name, description, status, startTime, duration);
+        this.id = id;
     }
 
     public String getName() {
@@ -71,8 +77,34 @@ public class Task {
     }
 
     public Instant getEndTime() {
-        return startTime.plusSeconds(duration * 60);
+        if (startTime != null) {
+            return startTime.plus(Duration.ofMinutes(duration));
+        } else {
+            return null;
+        }
     }
+
+    public Instant getStartTime() {
+        return startTime;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id && Objects.equals(name, task.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+
 
     @Override
     public String toString() {

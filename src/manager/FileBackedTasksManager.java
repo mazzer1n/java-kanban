@@ -5,26 +5,24 @@ import exception.ManagerSaveException;
 import tasks.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private final File file;
+    private final TreeSet<Task> prioritizedTasks;
 
     public FileBackedTasksManager(File file) {
         super();
         this.file = file;
+        this.prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime, Comparator.nullsLast(Comparator.naturalOrder())));
+        recoverManager();
     }
 
     public FileBackedTasksManager(File file, boolean append) {
         super();
         this.file = file;
-        checkAppend(append);
-    }
-
-    void checkAppend(boolean append) {
+        this.prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime, Comparator.nullsLast(Comparator.naturalOrder())));
         if (append) {
             recoverManager();
         }
@@ -32,120 +30,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     @Override
     public Subtask getSubtaskById(int id) {
-        historyManager.add(subtasks.get(id));
+        Subtask subtask = super.getSubtaskById(id);
         save();
-        return subtasks.get(id);
+        return subtask;
     }
 
     @Override
     public Task getTaskById(int id) {
-        historyManager.add(tasks.get(id));
+        Task task = super.getTaskById(id);
         save();
-        return tasks.get(id);
+        return task;
     }
 
     @Override
     public Epic getEpicById(int id) {
-        historyManager.add(epics.get(id));
+        Epic epic = super.getEpicById(id);
         save();
-        return epics.get(id);
-    }
-
-    @Override
-    public void addTask(Task task) {
-        super.addTask(task);
-        save();
-    }
-
-    @Override
-    public void addEpic(Epic epic) {
-        super.addEpic(epic);
-        save();
-    }
-
-    @Override
-    public void addSubtask(Subtask subtask) {
-        super.addSubtask(subtask);
-        save();
-    }
-
-    @Override
-    public void updateSubtask(Subtask subtask) {
-        updateSubtask(subtask);
-        save();
-    }
-
-    @Override
-    public void updateTask(Task task) {
-        super.updateTask(task);
-        save();
-    }
-
-    @Override
-    public void updateEpic(Epic epic) {
-        super.updateEpic(epic);
-        save();
-    }
-
-    @Override
-    public void deleteTaskById(int id) {
-        super.deleteTaskById(id);
-        save();
-    }
-
-    @Override
-    public void deleteSubtaskById(int id) {
-        super.deleteSubtaskById(id);
-        save();
-    }
-
-    @Override
-    public void deleteEpicById(int id) {
-        super.deleteEpicById(id);
-        save();
-    }
-
-    @Override
-    public void clearTasks() {
-        super.clearTasks();
-        save();
-    }
-
-    @Override
-    public void clearSubtasks() {
-        super.clearSubtasks();
-        save();
-    }
-
-    @Override
-    public void clearEpics() {
-        super.clearEpics();
-        save();
-    }
-
-    public void recoverSubtask(Subtask subtask) {
-        final Epic epic = epics.get(subtask.getEpicId());
-        epic.addSubtask(subtask.getId());
-        subtasks.put(subtask.getId(), subtask);
-        updateEpicStatus(epic);
-    }
-
-    private void save() {
-        String strHistory = "";
-        final List<Task> allTask = getAllTask();
-
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write("id,type,name,status,description,epic\n");
-            for (Task task : allTask) {
-                writer.write(TaskService.toString(task) + "\n");
-            }
-            writer.write("\n");
-            writer.write(TaskService.historyToString(historyManager));
-
-        } catch (IOException ex) {
-            throw new ManagerSaveException();
-        }
-
+        return epic;
     }
 
     public List<Task> getAllTask() {
@@ -154,6 +55,122 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         allTask.addAll(getEpicList());
         allTask.addAll(getSubtaskList());
         return allTask;
+    }
+
+
+    @Override
+    public void addTask(Task task) {
+        super.addTask(task);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void addEpic(Epic epic) {
+        super.addEpic(epic);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void addSubtask(Subtask subtask) {
+        super.addSubtask(subtask);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void updateTask(Task task) {
+        super.updateTask(task);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void deleteTaskById(int id) {
+        super.deleteTaskById(id);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void deleteSubtaskById(int id) {
+        super.deleteSubtaskById(id);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void deleteEpicById(int id) {
+        super.deleteEpicById(id);
+        updatePrioritizedTasks();
+        save();
+    }
+
+    @Override
+    public void clearTasks() {
+        super.clearTasks();
+        prioritizedTasks.clear();
+        save();
+    }
+
+    @Override
+    public void clearSubtasks() {
+        super.clearSubtasks();
+        prioritizedTasks.clear();
+        save();
+    }
+
+    @Override
+    public void clearEpics() {
+        super.clearEpics();
+        prioritizedTasks.clear();
+        save();
+    }
+
+    private void updatePrioritizedTasks() {
+        prioritizedTasks.clear();
+        prioritizedTasks.addAll(getAllTask());
+    }
+
+    public List<Task> getPrioritizedTasks() {
+        return new ArrayList<>(prioritizedTasks);
+    }
+
+    private void recoverSubtask(Subtask subtask) {
+        final Epic epic = epics.get(subtask.getEpicId());
+        epic.addSubtask(subtask);
+        subtasks.put(subtask.getId(), subtask);
+        updateEpicStatus(epic);
+        prioritizedTasks.add(subtask);
+    }
+
+    private void save() {
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write("id,type,name,status,description,epic,startTime,duration\n");
+            for (Task task : prioritizedTasks) {
+                writer.write(TaskService.toString(task) + "\n");
+            }
+            writer.write("\n");
+            writer.write(TaskService.historyToString(historyManager));
+
+        } catch (IOException ex) {
+            throw new ManagerSaveException();
+        }
     }
 
     private void recoverHistory(List<Integer> history) {
@@ -202,6 +219,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     } else {
                         recoverSubtask((Subtask) task);
                     }
+                    prioritizedTasks.add(task);
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 }
@@ -215,20 +233,20 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public static void main(String[] args) {
         File file = new File("/Users/maksimmalyarov/IdeaProjects/java-kanban1/tasks.txt");
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file, false);
-        fileBackedTasksManager.addEpic(new Epic("name", "decription"));
+        fileBackedTasksManager.addEpic(new Epic("name", "description"));
         fileBackedTasksManager.getEpicById(1);
-        fileBackedTasksManager.addTask(new Task("nameTask", "decriptionTask", Status.IN_PROGRESS));
+        fileBackedTasksManager.addTask(new Task("nameTask", "descriptionTask", Status.IN_PROGRESS));
         fileBackedTasksManager.addSubtask(new Subtask("nameSubtask", "descriptionSub", Status.IN_PROGRESS, 1));
         fileBackedTasksManager.getTaskById(2);
         fileBackedTasksManager.getSubtaskById(3);
         fileBackedTasksManager.addEpic(new Epic("name12", "description"));
-        FileBackedTasksManager manager2 = TaskService.loadFromFile(file);
-        manager2.addEpic(new Epic("nameEpic2", "decription2"));
+        FileBackedTasksManager manager2 = new FileBackedTasksManager(file, true);
+        manager2.addEpic(new Epic("nameEpic2", "description2"));
         manager2.addSubtask(new Subtask("nameSub1", "description1", Status.IN_PROGRESS, 4));
-
     }
-
 }
+
+
 
 
 
