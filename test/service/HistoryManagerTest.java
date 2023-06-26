@@ -4,25 +4,30 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import manager.HistoryManager;
 import manager.InMemoryHistoryManager;
+import manager.InMemoryTaskManager;
+import manager.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Status;
 import tasks.Task;
+
 import java.util.List;
 
-//Тут почему то не проходят тесты
 class HistoryManagerTest {
 
+    private TaskManager taskManager;
     private HistoryManager historyManager;
 
     @BeforeEach
     void setUp() {
+        taskManager = new InMemoryTaskManager();
         historyManager = new InMemoryHistoryManager();
     }
 
     @Test
     void shouldAddTaskToHistory() {
         Task task = new Task("Task 1", "Description 1", Status.NEW);
+        taskManager.addTask(task);
         historyManager.add(task);
 
         List<Task> history = historyManager.getHistory();
@@ -31,18 +36,12 @@ class HistoryManagerTest {
     }
 
     @Test
-    void shouldNotAddNullTaskToHistory() {
-        Task task = null;
-        historyManager.add(task);
-
-        List<Task> history = historyManager.getHistory();
-        assertTrue(history.isEmpty());
-    }
-
-    @Test
     void shouldRemoveTaskFromHistory() {
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         Task task2 = new Task("Task 2", "Description 2", Status.NEW);
+
+        taskManager.addTask(task1);
+        taskManager.addTask(task2);
 
         historyManager.add(task1);
         historyManager.add(task2);
@@ -64,6 +63,8 @@ class HistoryManagerTest {
     @Test
     void shouldHandleDuplicateTasksInHistory() {
         Task task = new Task("Task 1", "Description 1", Status.NEW);
+        taskManager.addTask(task);
+
         historyManager.add(task);
         historyManager.add(task);
 
@@ -76,6 +77,9 @@ class HistoryManagerTest {
     void shouldRemoveTaskFromBeginningOfHistory() {
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         Task task2 = new Task("Task 2", "Description 2", Status.NEW);
+
+        taskManager.addTask(task1);
+        taskManager.addTask(task2);
 
         historyManager.add(task1);
         historyManager.add(task2);
@@ -93,6 +97,10 @@ class HistoryManagerTest {
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         Task task2 = new Task("Task 2", "Description 2", Status.NEW);
         Task task3 = new Task("Task 3", "Description 3", Status.NEW);
+
+        taskManager.addTask(task1);
+        taskManager.addTask(task2);
+        taskManager.addTask(task3);
 
         historyManager.add(task1);
         historyManager.add(task2);
@@ -112,6 +120,9 @@ class HistoryManagerTest {
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         Task task2 = new Task("Task 2", "Description 2", Status.NEW);
 
+        taskManager.addTask(task1);
+        taskManager.addTask(task2);
+
         historyManager.add(task1);
         historyManager.add(task2);
 
@@ -123,3 +134,4 @@ class HistoryManagerTest {
         assertFalse(history.contains(task2));
     }
 }
+

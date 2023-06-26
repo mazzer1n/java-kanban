@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
 
-    private static TaskManager taskManager;
+    public static TaskManager taskManager;
     private static Epic epic;
 
     @BeforeEach

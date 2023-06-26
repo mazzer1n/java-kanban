@@ -10,30 +10,22 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-//id,type,name,status,description,epic
-//2,TASK,name,NEW,description
-//1,EPIC,name,NEW,description
-//3,SUBTASK,nameSub,NEW,description,1
+public class FileBackedTasksManagerTest {
 
-public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
-
-    private final File file = new File("/Users/maksimmalyarov/IdeaProjects/java-kanban1/tasks.txt");
-    FileBackedTasksManager fileBackedTasksManager;
-
-    @Override
-    protected FileBackedTasksManager createTaskManager() {
-        return new FileBackedTasksManager(file);
-    }
+    private File file;
+    private FileBackedTasksManager fileBackedTasksManager;
 
     @BeforeEach
-    @Override
-    void setUp() {
-        super.setUp();
-        fileBackedTasksManager = createTaskManager();
+    void setUp() throws IOException {
+        file = File.createTempFile("tasks", ".txt");
+        fileBackedTasksManager = new FileBackedTasksManager(file);
     }
 
     @Test
@@ -62,11 +54,11 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         fileBackedTasksManager.updateEpic(loadedEpic);
         fileBackedTasksManager.updateSubtask(loadedSubtask);
 
-        FileBackedTasksManager manager2 = TaskService.loadFromFile(file);
+        FileBackedTasksManager restoredManager = TaskService.loadFromFile(file);
 
-        Task updatedTask = manager2.getTaskById(task.getId());
-        Epic updatedEpic = manager2.getEpicById(epic.getId());
-        Subtask updatedSubtask = manager2.getSubtaskById(subtask.getId());
+        Task updatedTask = restoredManager.getTaskById(task.getId());
+        Epic updatedEpic = restoredManager.getEpicById(epic.getId());
+        Subtask updatedSubtask = restoredManager.getSubtaskById(subtask.getId());
 
         assertEquals(loadedTask, updatedTask);
         assertEquals(loadedEpic, updatedEpic);
@@ -83,7 +75,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         fileBackedTasksManager.addTask(task);
         fileBackedTasksManager.addSubtask(subtask);
 
-        List<Task> result = fileBackedTasksManager.getAllTask();
+        List<Task> result = fileBackedTasksManager.getAllTasks();
 
         assertNotNull(result);
         assertTrue(result.contains(task));
@@ -91,8 +83,24 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertTrue(result.contains(subtask));
     }
 
+    private Task createTask() {
+        return new Task("name", "description", Status.NEW);
+    }
+
+    @Test
+    void shouldRestoreEmptyTaskList() throws IOException {
+
+        FileBackedTasksManager restoredManager = TaskService.loadFromFile(file);
+
+        assertEquals(0, restoredManager.getNextId());
+        assertTrue(restoredManager.getTaskList().isEmpty());
+        assertTrue(restoredManager.getEpicList().isEmpty());
+        assertTrue(restoredManager.getSubtaskList().isEmpty());
+        assertTrue(restoredManager.getHistory().isEmpty());
+    }
 
 
 
 }
+
 
