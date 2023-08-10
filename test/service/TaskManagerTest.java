@@ -1,5 +1,7 @@
 package service;
 
+import exception.ManagerSaveException;
+import exception.ManagerUpdateException;
 import manager.InMemoryTaskManager;
 import manager.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +11,11 @@ import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static service.EpicTest.taskManager;
@@ -87,30 +93,27 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldUpdateTaskWithInvalidTaskId() {
-        TaskManager taskManager = new InMemoryTaskManager();
+    void shouldUpdateTaskWithInvalidTask() {
         Task task = createTask();
         taskManager.addTask(task);
         Task invalidTask = createTask();
         invalidTask.setId(2);
-        taskManager.addTask(invalidTask);
-        Task updatedTask = createTask();
-        updatedTask.setId(2);
-        taskManager.updateTask(updatedTask);
-        assertNotNull(taskManager.getTaskById(2));
-        assertEquals(task, taskManager.getTaskById(1));
+
+        ManagerUpdateException thrown = assertThrows(ManagerUpdateException.class,
+                () -> {
+                    taskManager.updateTask(invalidTask);
+                });
+        assertTrue(thrown.getMessage().contains("Invalid task."));
     }
 
 
     @Test
     void shouldUpdateTaskWithEmptyTaskList() {
-        TaskManager taskManager = new InMemoryTaskManager();
-        Task task = createTask();
-        taskManager.addTask(task);
-        taskManager.clearTasks();
-        task.setName("Updated Task");
-        taskManager.addTask(task);
-        assertNull(taskManager.getTaskById(1));
+        ManagerUpdateException thrown = assertThrows(ManagerUpdateException.class,
+                () -> {
+                    taskManager.updateTask(createTask());
+                });
+        assertTrue(thrown.getMessage().contains("Task list is empty."));
     }
 
 
@@ -213,4 +216,35 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNull(taskManager.getTaskById(0));
         assertNull(taskManager.getTaskById(-1));
     }
-}
+
+    @Test
+    void shouldReturnPrioritizedTasks() {
+        TreeSet<Task> tasks;
+        Task firstTask = new Task("name1","description",Status.NEW,Instant.now(),5);
+        Task secondTask = new Task("name2","description",Status.NEW,
+                Instant.now().plus(Duration.ofDays(5)),5);
+        taskManager.addTask(secondTask);
+        taskManager.addTask(firstTask);
+        tasks = taskManager.getPrioritizedTasks();
+        assertEquals(firstTask,tasks.first());
+        assertEquals(secondTask,tasks.last());
+
+    }
+
+    @Test
+    void shouldThrowExceptionTaskOverlaps() {
+        Task firstTask = new Task("name1","description",Status.NEW,Instant.now(),5);
+        Task secondTask = new Task("name2","description",Status.NEW,
+                Instant.now().plusSeconds(299),5);
+
+        taskManager.addTask(firstTask);
+        ManagerSaveException thrown = assertThrows(ManagerSaveException.class,
+                () -> {
+                    taskManager.addTask(secondTask);
+                });
+        assertTrue(thrown.getMessage().contains("Task overlaps with existing tasks."));
+    }
+
+    }
+
+

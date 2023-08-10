@@ -1,6 +1,7 @@
 package manager;
 
 import exception.ManagerSaveException;
+import exception.ManagerUpdateException;
 import tasks.*;
 
 import java.time.Duration;
@@ -78,9 +79,12 @@ public class InMemoryTaskManager implements TaskManager {
         saved.setName(subtask.getName());
         saved.setStatus(subtask.getStatus());
         saved.setDescription(subtask.getDescription());
+        saved.setStartTime(subtask.getStartTime());
+        saved.setDuration(subtask.getDuration());
         final Epic epic = epics.get(subtask.getEpicId());
         updateEpicStatus(epic);
     }
+
     private List<Task> getAllTasks() {
         List<Task> allTasks = new ArrayList<>();
         allTasks.addAll(tasks.values());
@@ -91,10 +95,18 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) {
+        if (tasks.isEmpty()) {
+            throw new ManagerUpdateException("Task list is empty.");
+        }
+        if (tasks.get(task.getId()) == null) {
+            throw new ManagerUpdateException("Invalid task.");
+        }
         Task saved = tasks.get(task.getId());
         saved.setName(task.getName());
         saved.setStatus(task.getStatus());
         saved.setDescription(task.getDescription());
+        saved.setStartTime(task.getStartTime());
+        saved.setDuration(task.getDuration());
     }
 
     @Override
@@ -269,6 +281,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     public int getNextId() {
         return nextId;
+    }
+
+    public TreeSet<Task> getPrioritizedTasks() {
+        return prioritizedTasks;
     }
 }
 

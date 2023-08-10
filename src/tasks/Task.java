@@ -92,6 +92,14 @@ public class Task {
         return duration;
     }
 
+    public void setStartTime(Instant startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
