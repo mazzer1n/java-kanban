@@ -1,6 +1,7 @@
 package service;
 
 import manager.FileBackedTasksManager;
+import manager.InMemoryTaskManager;
 import manager.TaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,13 +18,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileBackedTasksManagerTest {
+public class FileBackedTasksManagerTest extends  TaskManagerTest<FileBackedTasksManager> {
 
-    private File file;
+  /*  private File file;
     private FileBackedTasksManager fileBackedTasksManager;
-
+*/
+    @Override
+    protected FileBackedTasksManager createTaskManager() throws IOException {
+        return new FileBackedTasksManager(new File("/Users/maksimmalyarov/IdeaProjects/java-kanban1/tasks.txt"));
+    }
+/*
     @BeforeEach
-    void setUp() throws IOException {
+    void set() throws IOException {
         file = File.createTempFile("tasks", ".txt");
         fileBackedTasksManager = new FileBackedTasksManager(file);
     }
@@ -83,10 +89,6 @@ public class FileBackedTasksManagerTest {
         assertTrue(result.contains(subtask));
     }
 
-    private Task createTask() {
-        return new Task("name", "description", Status.NEW);
-    }
-
     @Test
     void shouldRestoreEmptyTaskList() throws IOException {
 
@@ -98,7 +100,7 @@ public class FileBackedTasksManagerTest {
         assertTrue(restoredManager.getSubtaskList().isEmpty());
         assertTrue(restoredManager.getHistory().isEmpty());
     }
-
+*/
 
 
 }

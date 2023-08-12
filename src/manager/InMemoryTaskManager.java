@@ -57,19 +57,16 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void addEpic(Epic epic) {
         epic.setId(generateId());
-        validateTaskAndSubtaskOverlap(epic);
         epics.put(epic.getId(), epic);
-        prioritizedTasks.add(epic);
     }
 
     @Override
     public void addSubtask(Subtask subtask) {
         subtask.setId(generateId());
-        validateTaskAndSubtaskOverlap(subtask);
         final Epic epic = epics.get(subtask.getEpicId());
         epic.addSubtask(subtask);
         subtasks.put(subtask.getId(), subtask);
-        updateEpicStatus(epic);
+        updateEpicTimesAndStatus(epic);
         prioritizedTasks.add(subtask);
     }
 
@@ -82,7 +79,7 @@ public class InMemoryTaskManager implements TaskManager {
         saved.setStartTime(subtask.getStartTime());
         saved.setDuration(subtask.getDuration());
         final Epic epic = epics.get(subtask.getEpicId());
-        updateEpicStatus(epic);
+        updateEpicTimesAndStatus(epic);
     }
 
     private List<Task> getAllTasks() {
@@ -130,7 +127,7 @@ public class InMemoryTaskManager implements TaskManager {
             final Epic epic = epics.get(subtask.getEpicId());
             epic.deleteSubtaskId(id);
             subtasks.remove(id);
-            updateEpicStatus(epic);
+            updateEpicTimesAndStatus(epic);
             historyManager.remove(id);
             prioritizedTasks.removeIf(task -> task.getId() == id);
         }
@@ -153,7 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    protected void updateEpicStatus(Epic epic) {
+    protected void updateEpicTimesAndStatus(Epic epic) {
         int statusNew = 0;
         int statusDone = 0;
         final int epicId = epic.getId();
@@ -177,7 +174,6 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
-        epics.put(epic.getId(), epic);
     }
 
     @Override

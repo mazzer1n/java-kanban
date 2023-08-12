@@ -1,5 +1,6 @@
 package tasks;
 
+import java.time.Duration;
 import java.time.Instant;
 
 public class Subtask extends Task {
@@ -17,13 +18,13 @@ public class Subtask extends Task {
         this.id = id;
     }
 
-    public Subtask(String name, String description, Status status, int epicId, Instant startTime, int duration) {
+    public Subtask(String name, String description, Status status, int epicId, Instant startTime, Duration duration) {
         this(name, description, status, epicId);
         this.startTime = startTime;
         this.duration = duration;
     }
 
-    public Subtask(String name, String description, Status status, int epicId, int id, Instant startTime, int duration) {
+    public Subtask(String name, String description, Status status, int epicId, int id, Instant startTime, Duration duration) {
         this(name, description, status, epicId, startTime, duration);
         this.id = id;
     }
@@ -59,7 +60,7 @@ public class Subtask extends Task {
         return epicId == other.epicId;
     }
 
-    public int getDuration() {
+    public Duration getDuration() {
         return this.duration;
     }
 

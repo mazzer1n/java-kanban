@@ -11,6 +11,7 @@ import tasks.Status;
 import tasks.Subtask;
 
 
+import java.time.Duration;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,9 +67,10 @@ class EpicTest {
 
     @Test
     public void shouldReturnStartTime() {
-        Subtask subtask1 = new Subtask("name1", "description", Status.NEW, 1, Instant.now(), 5);
+        Subtask subtask1 = new Subtask("name1", "description", Status.NEW, 1, Instant.now(),
+                Duration.ofMinutes(5));
         Subtask subtask2 = new Subtask("name2", "description", Status.NEW, 1,
-                Instant.now().minusSeconds(350), 5);
+                Instant.now().minusSeconds(350), Duration.ofMinutes(5));
         taskManager.addSubtask(subtask1);
         assertEquals(epic.getStartTime(), subtask1.getStartTime());
         taskManager.addSubtask(subtask2);
@@ -80,9 +82,10 @@ class EpicTest {
 
     @Test
     public void shouldReturnEndTime() {
-        Subtask subtask1 = new Subtask("name1", "description", Status.NEW, 1, Instant.now(), 5);
+        Subtask subtask1 = new Subtask("name1", "description", Status.NEW, 1, Instant.now(),
+                Duration.ofMinutes(5));
         Subtask subtask2 = new Subtask("name2", "description", Status.NEW, 1,
-                Instant.now().plusSeconds(350), 40);
+                Instant.now().plusSeconds(350), Duration.ofMinutes(30));
         assertNull(epic.getEndTime());
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
@@ -93,9 +96,10 @@ class EpicTest {
 
     @Test
     public void shouldThrowExceptionTaskOverlaps() {
-        Subtask subtask1 = new Subtask("name1", "description", Status.NEW, 1, Instant.now(), 5);
+        Subtask subtask1 = new Subtask("name1", "description", Status.NEW, 1, Instant.now(),
+                Duration.ofMinutes(5));
         Subtask subtask2 = new Subtask("name2", "description", Status.NEW, 1,
-                Instant.now().plusSeconds(299), 5);
+                Instant.now().plusSeconds(299), Duration.ofMinutes(5));
         taskManager.addSubtask(subtask1);
         ManagerSaveException thrown = assertThrows(ManagerSaveException.class,
                 () -> {

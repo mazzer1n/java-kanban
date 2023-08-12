@@ -4,6 +4,7 @@ import exception.ManagerRecoveryException;
 import tasks.*;
 
 import java.io.File;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,18 +27,21 @@ public class TaskService {
         if (typeTask == TypeTask.SUBTASK) {
             int epicId = Integer.parseInt(split[5]);
             Instant startTime = Instant.parse(split[6]);
-            int duration = Integer.parseInt(split[7]);
+            Duration duration = Duration.ofSeconds(Long.parseLong(split[7]));
             return new Subtask(name, description, status, epicId, id, startTime, duration);
         } else if (typeTask == TypeTask.TASK) {
             Instant startTime = Instant.parse(split[6]);
-            int duration = Integer.parseInt(split[7]);
+            Duration duration = Duration.ofSeconds(Long.parseLong(split[7]));
             return new Task(name, description, status, id, startTime, duration);
         } else if (typeTask == TypeTask.EPIC) {
+            //Duration duration = Duration.ofSeconds(Long.parseLong(split[6]));
+           // Instant endTime = Instant.parse(split[7]);
             return new Epic(name, description, id);
         }
 
         return null;
     }
+
 
     protected static String toString(Task task) {
         String strTask;
@@ -46,16 +50,18 @@ public class TaskService {
             strTask = String.format("%d,%S,%s,%S,%s,%d,%s,%d", subtask.getId(), String.valueOf(TypeTask.SUBTASK),
                     subtask.getName(), String.valueOf(subtask.getStatus()), subtask.getDescription(),
                     subtask.getEpicId(), subtask.getStartTime().toString(), subtask.getDuration());
-        } else if (task instanceof Task) {
-            Task t = (Task) task;
-            strTask = String.format("%d,%S,%s,%S,%s,,%s,%d", t.getId(), String.valueOf(t.getTypeTask()), t.getName(),
-                    String.valueOf(t.getStatus()), t.getDescription(), t.getStartTime().toString(), t.getDuration());
+        } else if (task instanceof Epic) {
+            Epic epic = (Epic) task;
+            strTask = String.format("%d,%S,%s,%S,%s,%d,%s,%d", epic.getId(), String.valueOf(epic.getTypeTask()),
+                    epic.getName(), String.valueOf(epic.getStatus()), epic.getDescription(), epic.getDuration(),
+                    epic.getEndTime().toString(), epic.getDuration());
         } else {
-            strTask = String.format("%d,%S,%s,%S,%s", task.getId(), String.valueOf(task.getTypeTask()), task.getName(),
-                    String.valueOf(task.getStatus()), task.getDescription());
+            strTask = String.format("%d,%S,%s,%S,%s,%s,%d", task.getId(), String.valueOf(task.getTypeTask()), task.getName(),
+                    String.valueOf(task.getStatus()), task.getDescription(), task.getStartTime().toString(), task.getDuration());
         }
         return strTask;
     }
+
 
     protected static String historyToString(HistoryManager manager) {
         final List<Task> history = manager.getHistory();

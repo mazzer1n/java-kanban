@@ -7,6 +7,13 @@ import tasks.*;
 import java.io.*;
 import java.util.*;
 
+import exception.ManagerRecoveryException;
+import exception.ManagerSaveException;
+import tasks.*;
+
+import java.io.*;
+import java.util.*;
+
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private final File file;
@@ -124,8 +131,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final Epic epic = epics.get(subtask.getEpicId());
         epic.addSubtask(subtask);
         subtasks.put(subtask.getId(), subtask);
-        updateEpicStatus(epic);
-        prioritizedTasks.add(subtask);
+        updateEpicTimesAndStatus(epic);
     }
 
     private void recoverHistory(List<Integer> history) {
@@ -171,6 +177,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         tasks.put(id, task);
                     } else if (task.getTypeTask() == TypeTask.EPIC) {
                         epics.put(id, (Epic) task);
+                        prioritizedTasks.add(task);
                     } else {
                         recoverSubtask((Subtask) task);
                     }
@@ -183,7 +190,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             throw new ManagerRecoveryException();
         }
     }
-
 
     public static void main(String[] args) {
         File file = new File("/Users/maksimmalyarov/IdeaProjects/java-kanban1/tasks.txt");
@@ -200,6 +206,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         manager2.addSubtask(new Subtask("nameSub1", "description1", Status.IN_PROGRESS, 4));
     }
 }
+
 
 
 

@@ -12,7 +12,7 @@ public class Task {
     protected int id;
     protected TypeTask typeTask;
     protected Instant startTime = Instant.now();
-    protected int duration = 0;
+    protected Duration duration = Duration.ZERO;
 
     public Task(String name, String description, Status status) {
         this.name = name;
@@ -26,13 +26,13 @@ public class Task {
         this.id = id;
     }
 
-    public Task(String name, String description, Status status, Instant startTime, int duration) {
+    public Task(String name, String description, Status status, Instant startTime, Duration duration) {
         this(name, description, status);
         this.startTime = startTime;
         this.duration = duration;
     }
 
-    public Task(String name, String description, Status status, int id, Instant startTime, int duration) {
+    public Task(String name, String description, Status status, int id, Instant startTime, Duration duration) {
         this(name, description, status, startTime, duration);
         this.id = id;
     }
@@ -78,7 +78,7 @@ public class Task {
 
     public Instant getEndTime() {
         if (startTime != null) {
-            return startTime.plus(Duration.ofMinutes(duration));
+            return startTime.plus(duration);
         } else {
             return null;
         }
@@ -88,7 +88,7 @@ public class Task {
         return startTime;
     }
 
-    public int getDuration() {
+    public Duration getDuration() {
         return duration;
     }
 
@@ -96,7 +96,7 @@ public class Task {
         this.startTime = startTime;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(Duration duration) {
         this.duration = duration;
     }
 
