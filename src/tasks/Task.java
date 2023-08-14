@@ -2,7 +2,6 @@ package tasks;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
 
 public class Task {
     private int value = 5;
@@ -40,6 +39,7 @@ public class Task {
     public String getName() {
         return name;
     }
+
     public void setValue(int value) {
         this.value = value;
     }
@@ -76,14 +76,6 @@ public class Task {
         return typeTask;
     }
 
-    public Instant getEndTime() {
-        if (startTime != null) {
-            return startTime.plus(duration);
-        } else {
-            return null;
-        }
-    }
-
     public Instant getStartTime() {
         return startTime;
     }
@@ -100,19 +92,9 @@ public class Task {
         this.duration = duration;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Task task = (Task) o;
-        return id == task.id && Objects.equals(name, task.name);
+    public Instant getEndTime() {
+        return startTime.plus(duration);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name);
-    }
-
 
     @Override
     public String toString() {
@@ -124,3 +106,4 @@ public class Task {
                 '}';
     }
 }
+

@@ -105,7 +105,7 @@ class EpicTest {
                 () -> {
                     taskManager.addSubtask(subtask2);
                 });
-        assertTrue(thrown.getMessage().contains("Task overlaps with existing tasks."));
+        assertTrue(thrown.getMessage().contains("Tasks is overlaps"));
     }
 
 }

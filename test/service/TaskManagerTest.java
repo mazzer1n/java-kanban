@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -26,7 +27,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     protected T taskManager;
 
-    protected abstract T createTaskManager() throws IOException;
+    protected abstract T createTaskManager();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -59,8 +60,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldAddTaskWithEmptyTaskList() {
-        Task task = createTask();
-        Task task1 = createTask();
+        Task task = new Task("name1", "description1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task task1 = new Task("name2", "description2", Status.NEW,
+                Instant.now().plusSeconds(2), Duration.ofSeconds(1));
         taskManager.clearTasks();
 
         taskManager.addTask(task);
@@ -104,7 +106,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 () -> {
                     taskManager.updateTask(invalidTask);
                 });
-        assertTrue(thrown.getMessage().contains("Invalid task."));
+        assertTrue(thrown.getMessage().contains("Invalid task or tasks list is empty"));
     }
 
 
@@ -114,7 +116,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 () -> {
                     taskManager.updateTask(createTask());
                 });
-        assertTrue(thrown.getMessage().contains("Task list is empty."));
+        assertTrue(thrown.getMessage().contains("Invalid task or tasks list is empty"));
     }
 
 
@@ -169,9 +171,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void shouldGetSubtasksOfEpicWithStandardBehavior() {
         Epic epic = new Epic("name", "description");
-        Subtask subtask = new Subtask("nameSub", "description", Status.NEW, 1,Instant.now(),Duration.ofMinutes(5));
+        Subtask subtask = new Subtask("nameSub", "description", Status.NEW, 1, Instant.now(), Duration.ofMinutes(5));
         Subtask subtask1 = new Subtask("nameSub1", "description", Status.NEW, 1,
-                Instant.now().plusSeconds(300),Duration.ofMinutes(5));
+                Instant.now().plusSeconds(300), Duration.ofMinutes(5));
 
         taskManager.addEpic(epic);
         taskManager.addSubtask(subtask);
@@ -221,32 +223,32 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldReturnPrioritizedTasks() {
-        TreeSet<Task> tasks;
-        Task firstTask = new Task("name1","description",Status.NEW,Instant.now(),Duration.ofMinutes(5));
-        Task secondTask = new Task("name2","description",Status.NEW,
-                Instant.now().plus(Duration.ofDays(5)),Duration.ofMinutes(5));
+        List<Task> tasks;
+        Task firstTask = new Task("name1", "description", Status.NEW, Instant.now(), Duration.ofMinutes(5));
+        Task secondTask = new Task("name2", "description", Status.NEW,
+                Instant.now().plus(Duration.ofDays(5)), Duration.ofMinutes(5));
         taskManager.addTask(secondTask);
         taskManager.addTask(firstTask);
         tasks = taskManager.getPrioritizedTasks();
-        assertEquals(firstTask,tasks.first());
-        assertEquals(secondTask,tasks.last());
+        assertEquals(firstTask, tasks.get(0));
+        assertEquals(secondTask, tasks.get(1));
 
     }
 
     @Test
     void shouldThrowExceptionTaskOverlaps() {
-        Task firstTask = new Task("name1","description",Status.NEW,Instant.now(),Duration.ofMinutes(5));
-        Task secondTask = new Task("name2","description",Status.NEW,
-                Instant.now().plusSeconds(299),Duration.ofMinutes(5));
+        Task firstTask = new Task("name1", "description", Status.NEW, Instant.now(), Duration.ofMinutes(5));
+        Task secondTask = new Task("name2", "description", Status.NEW,
+                Instant.now().plusSeconds(299), Duration.ofMinutes(5));
 
         taskManager.addTask(firstTask);
         ManagerSaveException thrown = assertThrows(ManagerSaveException.class,
                 () -> {
                     taskManager.addTask(secondTask);
                 });
-        assertTrue(thrown.getMessage().contains("Task overlaps with existing tasks."));
+        assertTrue(thrown.getMessage().contains("Tasks is overlaps"));
     }
 
-    }
+}
 
 
