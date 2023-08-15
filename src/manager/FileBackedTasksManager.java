@@ -129,6 +129,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final Epic epic = epics.get(subtask.getEpicId());
         epic.addSubtask(subtask.getId());
         subtasks.put(subtask.getId(), subtask);
+        prioritizedTasks.add(subtask);
         updateEpicStatus(epic);
         updateEpicTime(epic);
     }
@@ -200,6 +201,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     super.generateId();
                     if (task.getTypeTask() == TypeTask.TASK) {
                         tasks.put(id, task);
+                        prioritizedTasks.add(task);
                     } else if (task.getTypeTask() == TypeTask.EPIC) {
                         epics.put(id, (Epic) task);
                     } else {

@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import tasks.Status;
 import tasks.Task;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 class HistoryManagerTest {
@@ -37,8 +39,9 @@ class HistoryManagerTest {
 
     @Test
     void shouldRemoveTaskFromHistory() {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        Task task2 = new Task("Task 2", "Description 2", Status.NEW);
+        Task task1 = new Task("Task 1", "Description 1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task task2 = new Task("Task 2", "Description 2", Status.NEW,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
 
         taskManager.addTask(task1);
         taskManager.addTask(task2);
@@ -75,8 +78,9 @@ class HistoryManagerTest {
 
     @Test
     void shouldRemoveTaskFromBeginningOfHistory() {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        Task task2 = new Task("Task 2", "Description 2", Status.NEW);
+        Task task1 = new Task("Task 1", "Description 1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task task2 = new Task("Task 2", "Description 2", Status.NEW,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
 
         taskManager.addTask(task1);
         taskManager.addTask(task2);
@@ -94,9 +98,11 @@ class HistoryManagerTest {
 
     @Test
     void shouldRemoveTaskFromMiddleOfHistory() {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        Task task2 = new Task("Task 2", "Description 2", Status.NEW);
-        Task task3 = new Task("Task 3", "Description 3", Status.NEW);
+        Task task1 = new Task("Task 1", "Description 1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task task2 = new Task("Task 2", "Description 2", Status.NEW,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
+        Task task3 = new Task("Task 3", "Description 3", Status.NEW,
+                Instant.now().plusSeconds(50), Duration.ofSeconds(1));
 
         taskManager.addTask(task1);
         taskManager.addTask(task2);
@@ -117,8 +123,9 @@ class HistoryManagerTest {
 
     @Test
     void shouldRemoveTaskFromEndOfHistory() {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        Task task2 = new Task("Task 2", "Description 2", Status.NEW);
+        Task task1 = new Task("Task 1", "Description 1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task task2 = new Task("Task 2", "Description 2", Status.NEW,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
 
         taskManager.addTask(task1);
         taskManager.addTask(task2);

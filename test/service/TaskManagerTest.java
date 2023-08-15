@@ -62,7 +62,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     void shouldAddTaskWithEmptyTaskList() {
         Task task = new Task("name1", "description1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
         Task task1 = new Task("name2", "description2", Status.NEW,
-                Instant.now().plusSeconds(2), Duration.ofSeconds(1));
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
         taskManager.clearTasks();
 
         taskManager.addTask(task);
@@ -78,8 +78,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldUpdateTaskWithStandardBehavior() {
-        Task task = createTask();
-        Task updatedTask = createTask();
+        Task task = new Task("name1", "description1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task updatedTask = new Task("name2", "description2", Status.NEW,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
         updatedTask.setId(1);
         updatedTask.setName("newName");
         updatedTask.setDescription("newDescription");
@@ -97,9 +98,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldUpdateTaskWithInvalidTask() {
-        Task task = createTask();
+        Task task = new Task("name1", "description1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task invalidTask = new Task("name2", "description2", Status.NEW,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
         taskManager.addTask(task);
-        Task invalidTask = createTask();
         invalidTask.setId(2);
 
         ManagerUpdateException thrown = assertThrows(ManagerUpdateException.class,
@@ -146,8 +148,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldGetTaskListWithStandardBehavior() {
-        Task task = createTask();
-        Task task1 = createTask();
+        Task task = new Task("name1", "description1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task task1 = new Task("name2", "description2", Status.NEW,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
         task1.setName("newTask");
 
         taskManager.addTask(task);
@@ -173,7 +176,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic("name", "description");
         Subtask subtask = new Subtask("nameSub", "description", Status.NEW, 1, Instant.now(), Duration.ofMinutes(5));
         Subtask subtask1 = new Subtask("nameSub1", "description", Status.NEW, 1,
-                Instant.now().plusSeconds(300), Duration.ofMinutes(5));
+                Instant.now().plusSeconds(400), Duration.ofMinutes(5));
 
         taskManager.addEpic(epic);
         taskManager.addSubtask(subtask);

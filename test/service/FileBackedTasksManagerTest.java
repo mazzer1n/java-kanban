@@ -22,7 +22,6 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
     private final File file = File.createTempFile("tasks", ".txt");
 
-    private FileBackedTasksManager fileBackedTasksManager;
 
     public FileBackedTasksManagerTest() throws IOException {
     }

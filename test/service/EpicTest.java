@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class EpicTest {
 
     public static TaskManager taskManager;
-    private static Epic epic;
+    private Epic epic;
 
     @BeforeEach
     public void beforeEach() {
@@ -35,33 +35,45 @@ class EpicTest {
 
     @Test
     public void shouldReturnStatusNewWithSubtasks() {
-        taskManager.addSubtask(new Subtask("name1", "description", Status.NEW, 1));
-        taskManager.addSubtask(new Subtask("name2", "description", Status.NEW, 1));
-        taskManager.addSubtask(new Subtask("name3", "description", Status.NEW, 1));
+        taskManager.addSubtask(new Subtask("name1", "description", Status.NEW, 1,
+                Instant.now(), Duration.ofSeconds(1)));
+        taskManager.addSubtask(new Subtask("name2", "description", Status.NEW, 1,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1)));
+        taskManager.addSubtask(new Subtask("name3", "description", Status.NEW, 1,
+                Instant.now().plusSeconds(100), Duration.ofSeconds(1)));
         assertEquals(Status.NEW, epic.getStatus());
     }
 
     @Test
     public void shouldReturnStatusDone() {
-        taskManager.addSubtask(new Subtask("name1", "description", Status.DONE, 1));
-        taskManager.addSubtask(new Subtask("name2", "description", Status.DONE, 1));
-        taskManager.addSubtask(new Subtask("name3", "description", Status.DONE, 1));
+        taskManager.addSubtask(new Subtask("name1", "description", Status.DONE, 1,
+                Instant.now(), Duration.ofSeconds(1)));
+        taskManager.addSubtask(new Subtask("name2", "description", Status.DONE, 1,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1)));
+        taskManager.addSubtask(new Subtask("name3", "description", Status.DONE, 1,
+                Instant.now().plusSeconds(100), Duration.ofSeconds(1)));
         assertEquals(Status.DONE, epic.getStatus());
     }
 
     @Test
     public void shouldReturnStatusInProgressWithDifferent() {
-        taskManager.addSubtask(new Subtask("name1", "description", Status.DONE, 1));
-        taskManager.addSubtask(new Subtask("name2", "description", Status.NEW, 1));
-        taskManager.addSubtask(new Subtask("name3", "description", Status.DONE, 1));
+        taskManager.addSubtask(new Subtask("name1", "description", Status.IN_PROGRESS, 1,
+                Instant.now(), Duration.ofSeconds(1)));
+        taskManager.addSubtask(new Subtask("name2", "description", Status.DONE, 1,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1)));
+        taskManager.addSubtask(new Subtask("name3", "description", Status.IN_PROGRESS, 1,
+                Instant.now().plusSeconds(100), Duration.ofSeconds(1)));
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
 
     @Test
     public void shouldReturnStatusInProgress() {
-        taskManager.addSubtask(new Subtask("name1", "description", Status.IN_PROGRESS, 1));
-        taskManager.addSubtask(new Subtask("name2", "description", Status.IN_PROGRESS, 1));
-        taskManager.addSubtask(new Subtask("name3", "description", Status.IN_PROGRESS, 1));
+        taskManager.addSubtask(new Subtask("name1", "description", Status.IN_PROGRESS, 1,
+                Instant.now(), Duration.ofSeconds(1)));
+        taskManager.addSubtask(new Subtask("name2", "description", Status.IN_PROGRESS, 1,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1)));
+        taskManager.addSubtask(new Subtask("name3", "description", Status.IN_PROGRESS, 1,
+                Instant.now().plusSeconds(100), Duration.ofSeconds(1)));
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
 
@@ -70,7 +82,7 @@ class EpicTest {
         Subtask subtask1 = new Subtask("name1", "description", Status.NEW, 1, Instant.now(),
                 Duration.ofMinutes(5));
         Subtask subtask2 = new Subtask("name2", "description", Status.NEW, 1,
-                Instant.now().minusSeconds(350), Duration.ofMinutes(5));
+                Instant.now().minusSeconds(400), Duration.ofMinutes(5));
         taskManager.addSubtask(subtask1);
         assertEquals(epic.getStartTime(), subtask1.getStartTime());
         taskManager.addSubtask(subtask2);
@@ -85,7 +97,7 @@ class EpicTest {
         Subtask subtask1 = new Subtask("name1", "description", Status.NEW, 1, Instant.now(),
                 Duration.ofMinutes(5));
         Subtask subtask2 = new Subtask("name2", "description", Status.NEW, 1,
-                Instant.now().plusSeconds(350), Duration.ofMinutes(30));
+                Instant.now().plusSeconds(400), Duration.ofMinutes(30));
         assertNull(epic.getEndTime());
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
