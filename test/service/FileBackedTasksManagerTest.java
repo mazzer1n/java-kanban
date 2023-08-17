@@ -29,17 +29,17 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
     @Override
     protected FileBackedTasksManager createTaskManager() {
-        return new FileBackedTasksManager(file);
+        return new FileBackedTasksManager(file.getAbsolutePath());
     }
 
     @Test
     void shouldRestoreEmptyTaskList() throws IOException {
         File file = createTempFile();
-        FileBackedTasksManager manager = new FileBackedTasksManager(file);
+        FileBackedTasksManager manager = new FileBackedTasksManager(file.getAbsolutePath());
 
         manager.clearTasks();
 
-        FileBackedTasksManager restoredManager = TaskService.loadFromFile(file);
+        FileBackedTasksManager restoredManager = TaskService.loadFromFile(file.getAbsolutePath());
 
         assertTrue(restoredManager.getTaskList().isEmpty());
     }
@@ -47,12 +47,12 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     @Test
     void shouldRestoreEpicWithoutSubtasks() throws IOException {
         File file = createTempFile();
-        FileBackedTasksManager manager = new FileBackedTasksManager(file);
+        FileBackedTasksManager manager = new FileBackedTasksManager(file.getAbsolutePath());
 
         Epic epic = new Epic("Epic without Subtasks", "Description");
         manager.addEpic(epic);
 
-        FileBackedTasksManager restoredManager = TaskService.loadFromFile(file);
+        FileBackedTasksManager restoredManager = TaskService.loadFromFile(file.getAbsolutePath());
 
         List<Epic> epics = restoredManager.getEpicList();
         assertEquals(1, epics.size());
@@ -63,14 +63,14 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     @Test
     void shouldRestoreEmptyHistory() throws IOException {
         File file = createTempFile();
-        FileBackedTasksManager manager = new FileBackedTasksManager(file);
+        FileBackedTasksManager manager = new FileBackedTasksManager(file.getAbsolutePath());
 
         Task task = new Task("Task", "Description", Status.NEW);
         manager.addTask(task);
 
         manager.clearHistory();
 
-        FileBackedTasksManager restoredManager = TaskService.loadFromFile(file);
+        FileBackedTasksManager restoredManager = TaskService.loadFromFile(file.getAbsolutePath());
 
         assertTrue(restoredManager.getHistory().isEmpty());
     }

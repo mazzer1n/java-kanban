@@ -15,14 +15,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private final File file;
 
-    public FileBackedTasksManager(File file) {
+    public FileBackedTasksManager(String path) {
         super();
-        this.file = file;
+        this.file = new File(path);
     }
 
-    FileBackedTasksManager(File file, boolean append) {
+    FileBackedTasksManager(String path, boolean append) {
         super();
-        this.file = file;
+        this.file = new File(path);
         checkAppend(append);
     }
 
@@ -218,8 +218,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
 
     public static void main(String[] args) {
-        File file = new File("/Users/maksimmalyarov/IdeaProjects/java-kanban1/tasks.txt");
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file,false);
+        String path = "/Users/maksimmalyarov/IdeaProjects/java-kanban1/tasks.txt";
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(path,false);
         fileBackedTasksManager.addEpic(new Epic("name", "decription"));
         fileBackedTasksManager.getEpicById(1);
         fileBackedTasksManager.addTask(new Task("nameTask", "decriptionTask", Status.IN_PROGRESS, Instant.now(),
@@ -228,7 +228,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 Instant.now().plusSeconds(500),Duration.ofSeconds(500)));
         fileBackedTasksManager.getTaskById(2);
         fileBackedTasksManager.getSubtaskById(3);
-        FileBackedTasksManager manager2 = TaskService.loadFromFile(file);
+        FileBackedTasksManager manager2 = TaskService.loadFromFile(path);
         manager2.addEpic(new Epic("nameEpic2","decription2"));
         manager2.addSubtask(new Subtask("nameSub1","description1",Status.IN_PROGRESS,4,
                 Instant.now().plusSeconds(5000),Duration.ofSeconds(5000)));

@@ -79,8 +79,8 @@ public class TaskService {
         return history;
     }
 
-    public static FileBackedTasksManager loadFromFile(File file) {
-        return new FileBackedTasksManager(file, true);
+    public static FileBackedTasksManager loadFromFile(String path) {
+        return new FileBackedTasksManager(path, true);
     }
 
 }
