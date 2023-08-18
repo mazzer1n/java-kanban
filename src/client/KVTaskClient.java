@@ -39,6 +39,24 @@ public class KVTaskClient {
         }
     }
 
+    public void delete(String key) {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/delete/" + key + "?API_TOKEN=" + apiToken))
+                .DELETE()
+                .build();
+
+        try {
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+
+            if (response.statusCode() != 200) {
+                throw new ManagerSaveException("Ошибка удаления данных с сервера.");
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new ManagerSaveException("Ошибка удаления данных с сервера.");
+        }
+    }
+
     public void put(String key, String json) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()

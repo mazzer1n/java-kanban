@@ -1,5 +1,6 @@
 package server;
 
+import client.KVTaskClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
@@ -13,8 +14,12 @@ import tasks.Task;
 import exception.InterruptedException;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,10 +54,11 @@ public class HttpTaskServer {
 
     private static class TaskHandler implements HttpHandler {
 
-        private Gson gson;
+        private final Gson gson;
         private final TaskManager taskManager;
+        private KVTaskClient kvTaskClient = new KVTaskClient(new URL("http://localhost:8080"));
 
-        public TaskHandler(TaskManager taskManager) {
+        public TaskHandler(TaskManager taskManager) throws MalformedURLException {
             this.taskManager = taskManager;
             gson = new GsonBuilder().create();
         }
@@ -135,10 +141,70 @@ public class HttpTaskServer {
                 } else {
                     sendResponse(exchange, "Эпик не найден", HttpURLConnection.HTTP_NOT_FOUND);
                 }
+            } else if (method.equals("POST")) {
+                if (path.equals("/tasks/task/")) {
+                    InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+                    Task newTask = gson.fromJson(reader, Task.class);
+
+                    // Отправляем новую задачу на сервер KVServer для сохранения
+                    kvTaskClient.put("task_" + newTask.getId(), gson.toJson(newTask));
+
+                    taskManager.addTask(newTask);
+                    sendResponse(exchange, "Задача успешно создана", HttpURLConnection.HTTP_OK);
+                } else if (path.equals("/tasks/subtask/")) {
+                    InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+                    Subtask newSubtask = gson.fromJson(reader, Subtask.class);
+
+                    // Отправляем новую подзадачу на сервер KVServer для сохранения
+                    kvTaskClient.put("subtask_" + newSubtask.getId(), gson.toJson(newSubtask));
+
+                    taskManager.addSubtask(newSubtask);
+                    sendResponse(exchange, "Подзадача успешно создана", HttpURLConnection.HTTP_OK);
+                } else if (path.equals("/tasks/epics/")) {
+                    InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+                    Epic newEpic = gson.fromJson(reader, Epic.class);
+
+                    // Отправляем новый эпик на сервер KVServer для сохранения
+                    kvTaskClient.put("epic_" + newEpic.getId(), gson.toJson(newEpic));
+
+                    taskManager.addEpic(newEpic);
+                    sendResponse(exchange, "Эпик успешно создан", HttpURLConnection.HTTP_OK);
+                } else {
+                    sendResponse(exchange, "Метод не поддерживается", HttpURLConnection.HTTP_BAD_METHOD);
+                }
+            } else if (method.equals("DELETE")) {
+                if (path.startsWith("/tasks/task/?id=")) {
+                    int taskId = parseFromPathIfEqual(path);
+
+                    // Удаляем задачу с заданным ID
+                    taskManager.deleteTaskById(taskId);
+                    kvTaskClient.delete("task_" + taskId);
+
+                    sendResponse(exchange, "Задача успешно удалена", HttpURLConnection.HTTP_OK);
+                } else if (path.startsWith("/tasks/subtask/?id=")) {
+                    int subtaskId = parseFromPathIfEqual(path);
+
+                    // Удаляем подзадачу с заданным ID
+                    taskManager.deleteSubtaskById(subtaskId);
+                    kvTaskClient.delete("subtask_" + subtaskId);
+
+                    sendResponse(exchange, "Подзадача успешно удалена", HttpURLConnection.HTTP_OK);
+                } else if (path.startsWith("/tasks/epics/?id=")) {
+                    int epicId = parseFromPathIfEqual(path);
+
+                    // Удаляем эпик с заданным ID
+                    taskManager.deleteEpicById(epicId);
+                    kvTaskClient.delete("epic_" + epicId);
+
+                    sendResponse(exchange, "Эпик успешно удален", HttpURLConnection.HTTP_OK);
+                } else {
+                    sendResponse(exchange, "Метод не поддерживается", HttpURLConnection.HTTP_BAD_METHOD);
+                }
             } else {
                 sendResponse(exchange, "Метод не поддерживается", HttpURLConnection.HTTP_BAD_METHOD);
             }
         }
+
 
         private int parseFromPathIfEqual(String path) {
             String[] parts = path.split("=");

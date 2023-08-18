@@ -3,14 +3,15 @@ import server.KVServer;
 import javax.naming.Context;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 import manager.*;
+import tasks.Status;
 import tasks.Task;
 
 public class Main {
-
-    private static Context kvServer;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         KVServer server = new KVServer();
@@ -20,11 +21,12 @@ public class Main {
 
         TaskManager manager = Managers.getHttpTaskManager(String.valueOf(kvServerUrl));
 
-        Task task1 = new Task("Task 1:", "1");
-        Task task2 = new Task("Task 2:", "2");
+        Task task1 = new Task("name1", "description1", Status.NEW, Instant.now(), Duration.ofSeconds(1));
+        Task task2 = new Task("name2", "description2", Status.NEW,
+                Instant.now().plusSeconds(10), Duration.ofSeconds(1));
 
-        manager.createTask(task1);
-        manager.createTask(task2);
+        manager.addTask(task1);
+        manager.addTask(task2);
 
         List<Task> tasks = manager.getAllTasks();
         for (Task task : tasks) {
@@ -38,6 +40,6 @@ public class Main {
             System.out.println(task);
         }
 
-        kvServer.stop();
+        server.stop();
     }
 }

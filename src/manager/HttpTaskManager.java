@@ -59,7 +59,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
             taskClient.put("history", jsonHistory);
 
-            taskClient.put("idCounter", String.valueOf(idCounter));
+            taskClient.put("idCounter", String.valueOf(nextId - 1));
         } catch (Exception e) {
             throw new ManagerSaveException("Ошибка сохранения задач в KVServer.");
         }
