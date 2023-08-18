@@ -10,7 +10,6 @@ import java.util.Map;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-// Тут пока вообще не понял, что происходит
 public class KVServer {
     public static final int PORT = 8078;
     private final String apiToken;
@@ -25,8 +24,30 @@ public class KVServer {
         server.createContext("/load", this::load);
     }
 
-    private void load(HttpExchange h) {
-        // TODO Добавьте получение значения по ключу
+    private void load(HttpExchange h) throws IOException {
+        if (!hasAuth(h)) {
+            System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+            h.sendResponseHeaders(403, 0);
+            return;
+        }
+        if ("GET".equals(h.getRequestMethod())) {
+            String key = h.getRequestURI().getPath().substring("/load/".length());
+            if (key.isEmpty()) {
+                System.out.println("Key для загрузки пустой. key указывается в пути: /load/{key}");
+                h.sendResponseHeaders(400, 0);
+                return;
+            }
+            String value = data.get(key);
+            if (value == null) {
+                System.out.println("Нет значения для ключа " + key);
+                h.sendResponseHeaders(404, 0);
+                return;
+            }
+            sendText(h, value);
+        } else {
+            System.out.println("/load ждёт GET-запрос, а получил " + h.getRequestMethod());
+            h.sendResponseHeaders(405, 0);
+        }
     }
 
     private void save(HttpExchange h) throws IOException {

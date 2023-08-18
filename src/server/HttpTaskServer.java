@@ -1,74 +1,164 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import manager.*;
-import tasks.*;
+import manager.Managers;
+import manager.TaskManager;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+import exception.InterruptedException;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpTaskServer {
+
     private static final int PORT = 8080;
-    public static final TaskManager taskManager = Managers.getFileBackedTaskManager();
-    public static void main(String[] args) throws IOException {
+    private final TaskManager taskManager;
 
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
-        server.createContext("/tasks", new TaskHandler());
-        server.start();
-
-        System.out.println("HTTP-сервер запущен на порту " + PORT);
+    public HttpTaskServer(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
 
-    public static class TaskHandler implements HttpHandler {
+    public void startServer() throws IOException {
+        try {
+            HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+            server.createContext("/", new TaskHandler(taskManager));
+            server.setExecutor(null);
+            server.start();
+
+            System.out.println("Сервер запущен на порту " + PORT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        TaskManager taskManager = Managers.getFileBackedTaskManager("/Users/maksimmalyarov/IdeaProjects/java-kanban1/tasks.txt");
+
+        new HttpTaskServer(taskManager).startServer();
+    }
+
+    private static class TaskHandler implements HttpHandler {
+
+        private Gson gson;
+        private final TaskManager taskManager;
+
+        public TaskHandler(TaskManager taskManager) {
+            this.taskManager = taskManager;
+            gson = new GsonBuilder().create();
+        }
+
         @Override
-        public void handle(HttpExchange ex) {
+        public void handle(HttpExchange exchange) throws IOException {
+            String method = exchange.getRequestMethod();
+            String path = exchange.getRequestURI().getPath();
 
-            URI uri = ex.getRequestURI();
-            String path = uri.getPath();
-            String method = ex.getRequestMethod();
-            String query = uri.getQuery();
-            String response;
+            if (method.equals("GET") && path.equals("/tasks/task/")) {
+                List<Task> tasks = taskManager.getTaskList();
+                String response = gson.toJson(tasks);
+                sendResponse(exchange, response);
+            } else if (method.equals("GET") && path.equals("/tasks/subtask/")) {
+                List<Subtask> subtasks = taskManager.getSubtaskList();
+                String response = gson.toJson(subtasks);
+                sendResponse(exchange, response);
+            } else if (method.equals("GET") && path.equals("/tasks/epics/")) {
+                List<Epic> epics = taskManager.getEpicList();
+                String response = gson.toJson(epics);
+                sendResponse(exchange, response);
+            } else if (method.equals("GET") && path.startsWith("/tasks/task/?id=")) {
+                int taskId = parseFromPathIfEqual(path);
+                Task task = null;
+                try {
+                    task = taskManager.getTaskById(taskId);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
 
-            switch (method) {
-                case "GET":
+                if (task != null) {
+                    String response = gson.toJson(task);
+                    sendResponse(exchange, response);
+                } else {
+                    sendResponse(exchange, "Задача не найдена", HttpURLConnection.HTTP_NOT_FOUND);
+                }
+            } else if (method.equals("GET") && path.startsWith("/tasks/subtask/?id=")) {
+                int subtaskId = parseFromPathIfEqual(path);
+                Subtask subtask = null;
+                try {
+                    subtask = taskManager.getSubtaskById(subtaskId);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
 
-                case "POST":
+                if (subtask != null) {
+                    String response = gson.toJson(subtask);
+                    sendResponse(exchange, response);
+                } else {
+                    sendResponse(exchange, "Подзадача не найдена", HttpURLConnection.HTTP_NOT_FOUND);
+                }
+            } else if (method.equals("GET") && path.startsWith("/tasks/epics/?id=")) {
+                int epicId = parseFromPathIfEqual(path);
+                Epic epic = null;
+                try {
+                    epic = taskManager.getEpicById(epicId);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
 
-                case "DELETE":
+                if (epic != null) {
+                    String response = gson.toJson(epic);
+                    sendResponse(exchange, response);
+                } else {
+                    sendResponse(exchange, "Эпик не найден", HttpURLConnection.HTTP_NOT_FOUND);
+                }
+            } else if (method.equals("GET") && path.startsWith("/tasks/subtask/epic/?id=")) {
+                int epicId = parseFromPathIfEqual(path);
+                Epic epic = null;
+                try {
+                    epic = taskManager.getEpicById(epicId);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
 
-                default:
-                    response = "Метод не поддерживается.";
-
+                if (epic != null) {
+                    List<Subtask> subtasksOfEpic = taskManager.getSubtasksOfEpic(epic);
+                    String response = gson.toJson(subtasksOfEpic);
+                    sendResponse(exchange, response);
+                } else {
+                    sendResponse(exchange, "Эпик не найден", HttpURLConnection.HTTP_NOT_FOUND);
+                }
+            } else {
+                sendResponse(exchange, "Метод не поддерживается", HttpURLConnection.HTTP_BAD_METHOD);
             }
-
         }
-//тут формируется ответ при GET, либо переадресация на client при POST и DELETE?
-        private String requestGET(String path, String query) {
-            String[] keyValue = query.split("=");
-            Gson gson = new Gson();
-            String response = "Указан неверный путь";
-            if (path.contains("tasks/task")) {
-                Task task = taskManager.getTaskById(Integer.parseInt(keyValue[1]));
-                response = gson.toJson(task);
-            } else if (path.contains("tasks/subtask")) {
-                Subtask subtask = taskManager.getSubtaskById(Integer.parseInt(keyValue[1]));
-                response = gson.toJson(subtask);
-            } else if (path.contains("tasks/epic")) {
-                Epic epic = taskManager.getEpicById(Integer.parseInt(keyValue[1]));
-                response = gson.toJson(epic);
-            } else if (path.contains("tasks/history")) {
-                response = gson.toJson(taskManager.getHistory());
 
+        private int parseFromPathIfEqual(String path) {
+            String[] parts = path.split("=");
+            if (parts.length < 2) {
+                throw new IllegalArgumentException("Invalid path format");
             }
-            return response;
+            return Integer.parseInt(parts[1]);
         }
 
-        private void requestPOST(String path) {}
+        private void sendResponse(HttpExchange exchange, String response, int responseCode) throws IOException {
+            byte[] bytes = response.getBytes();
+            exchange.sendResponseHeaders(responseCode, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.getResponseBody().close();
+        }
 
-        private void requestDELETE(String path) {}
+        private void sendResponse(HttpExchange exchange, String response) throws IOException {
+            sendResponse(exchange, response, HttpURLConnection.HTTP_OK);
+        }
     }
 }
+
+

@@ -304,6 +304,21 @@ public class InMemoryTaskManager implements TaskManager {
         return List.copyOf(prioritizedTasks);
     }
 
+    public List<Task> getAllTasks() {
+        final List<Task> allTask = new ArrayList<>();
+        allTask.addAll(getTaskList());
+        allTask.addAll(getEpicList());
+        allTask.addAll(getSubtaskList());
+        return allTask;
+    }
+
+    @Override
+    public void deleteAllTasks() {
+        clearTasks();
+        clearEpics();
+        clearSubtasks();
+    }
+
     private void removeAllTasks() {
         prioritizedTasks.removeIf(task -> !(task instanceof Subtask));
     }

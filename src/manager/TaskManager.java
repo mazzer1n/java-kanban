@@ -51,5 +51,8 @@ public interface TaskManager {
 
     List<Task> getPrioritizedTasks();
 
+    List<Task> getAllTasks();
+
+    void deleteAllTasks();
 }
 

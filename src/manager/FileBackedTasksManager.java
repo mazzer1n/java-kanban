@@ -134,9 +134,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         updateEpicTime(epic);
     }
 
-    private void save() {
+    protected void save() {
         String strHistory = "";
-        final List<Task> allTask = getAllTask();
+        final List<Task> allTask = getAllTasks();
 
         try (FileWriter writer = new FileWriter(file)) {
             writer.write("id,type,name,status,description,epic,startTime,duration\n");
@@ -152,13 +152,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     }
 
-    public List<Task> getAllTask() {
-        final List<Task> allTask = new ArrayList<>();
-        allTask.addAll(getTaskList());
-        allTask.addAll(getEpicList());
-        allTask.addAll(getSubtaskList());
-        return allTask;
-    }
+
 
     private void recoverHistory(List<Integer> history) {
         final HashMap<Integer, Task> allTask = new HashMap<>();
