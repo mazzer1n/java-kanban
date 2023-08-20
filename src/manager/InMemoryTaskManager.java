@@ -198,10 +198,10 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.setStartTime(subtask.getStartTime());
                 epic.setDuration(subtask.getDuration());
                 epic.setEndTime(subtask.getEndTime());
-            } else if (startTime.isAfter(subtask.getStartTime())) { //Время старта по умолчанию Instant.now()
+            } else if (startTime.isAfter(subtask.getStartTime())) {
                 epic.setStartTime(subtask.getStartTime());
                 epic.setDuration(duration.plus(subtask.getDuration()));
-            } else if (endTime.isBefore(subtask.getEndTime())) { // по умолчанию duration.zero, время конца всегда будет
+            } else if (endTime.isBefore(subtask.getEndTime())) {
                 epic.setEndTime(subtask.getEndTime());
                 epic.setDuration(duration.plus(subtask.getDuration()));
             } else {
