@@ -28,9 +28,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static service.EpicTest.taskManager;
 
-class HttpTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
+class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
     private static final int PORT = 8080;
-    private HttpServer server;
+    private static HttpServer server;
 
     private static final String BASE_URL = "http://localhost:8080";
 
@@ -43,7 +43,7 @@ class HttpTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
 
     @BeforeAll
-    public void setUpServer() throws IOException {
+    public static void setUpServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
     }
 

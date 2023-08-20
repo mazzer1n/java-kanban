@@ -72,6 +72,10 @@ public class HttpTaskServer {
                 List<Task> tasks = taskManager.getTaskList();
                 String response = gson.toJson(tasks);
                 sendResponse(exchange, response);
+            } else if (method.equals("GET") && path.equals("/tasks/")) {
+                List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+                String response = gson.toJson(prioritizedTasks);
+                sendResponse(exchange, response);
             } else if (method.equals("GET") && path.equals("/tasks/subtask/")) {
                 List<Subtask> subtasks = taskManager.getSubtaskList();
                 String response = gson.toJson(subtasks);
@@ -146,7 +150,7 @@ public class HttpTaskServer {
                     InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                     Task newTask = gson.fromJson(reader, Task.class);
 
-                    // Отправляем новую задачу на сервер KVServer для сохранения
+
                     kvTaskClient.put("task_" + newTask.getId(), gson.toJson(newTask));
 
                     taskManager.addTask(newTask);
@@ -155,7 +159,7 @@ public class HttpTaskServer {
                     InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                     Subtask newSubtask = gson.fromJson(reader, Subtask.class);
 
-                    // Отправляем новую подзадачу на сервер KVServer для сохранения
+
                     kvTaskClient.put("subtask_" + newSubtask.getId(), gson.toJson(newSubtask));
 
                     taskManager.addSubtask(newSubtask);
@@ -164,7 +168,7 @@ public class HttpTaskServer {
                     InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                     Epic newEpic = gson.fromJson(reader, Epic.class);
 
-                    // Отправляем новый эпик на сервер KVServer для сохранения
+
                     kvTaskClient.put("epic_" + newEpic.getId(), gson.toJson(newEpic));
 
                     taskManager.addEpic(newEpic);
@@ -176,7 +180,7 @@ public class HttpTaskServer {
                 if (path.startsWith("/tasks/task/?id=")) {
                     int taskId = parseFromPathIfEqual(path);
 
-                    // Удаляем задачу с заданным ID
+
                     taskManager.deleteTaskById(taskId);
                     kvTaskClient.delete("task_" + taskId);
 
@@ -184,7 +188,7 @@ public class HttpTaskServer {
                 } else if (path.startsWith("/tasks/subtask/?id=")) {
                     int subtaskId = parseFromPathIfEqual(path);
 
-                    // Удаляем подзадачу с заданным ID
+
                     taskManager.deleteSubtaskById(subtaskId);
                     kvTaskClient.delete("subtask_" + subtaskId);
 
@@ -192,7 +196,7 @@ public class HttpTaskServer {
                 } else if (path.startsWith("/tasks/epics/?id=")) {
                     int epicId = parseFromPathIfEqual(path);
 
-                    // Удаляем эпик с заданным ID
+
                     taskManager.deleteEpicById(epicId);
                     kvTaskClient.delete("epic_" + epicId);
 
