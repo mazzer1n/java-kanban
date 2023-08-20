@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 
 public class HttpTaskManager extends FileBackedTasksManager {
     private final KVTaskClient taskClient;
-    private final String keyTasks = "tasks";
-    private final String keyEpics = "epics";
-    private final String keySubtasks = "subtasks";
-    private final String keyHistory = "history";
-    private static final Gson gson = new Gson();
+    private static final String KEY_TASKS = "tasks";
+    private static final String KEY_EPICS = "epics";
+    private static final String KEY_SUBTASKS = "subtasks";
+    private static final String KEY_HISTORY = "history";
+    private static final Gson gson = Managers.createCustomGson();
 
     public HttpTaskManager(String uri) {
         this(uri,false);
@@ -44,13 +44,13 @@ public class HttpTaskManager extends FileBackedTasksManager {
     public void save() {
         try {
             String jsonTasks = gson.toJson(new ArrayList<>(tasks.values()));
-            taskClient.put(keyTasks, jsonTasks);
+            taskClient.put(KEY_TASKS, jsonTasks);
 
             String jsonEpics = gson.toJson(new ArrayList<>(epics.values()));
-            taskClient.put(keyEpics, jsonEpics);
+            taskClient.put(KEY_EPICS, jsonEpics);
 
             String jsonSubtasks = gson.toJson(new ArrayList<>(subtasks.values()));
-            taskClient.put(keySubtasks, jsonSubtasks);
+            taskClient.put(KEY_SUBTASKS, jsonSubtasks);
 
 
             List<Integer> historyIds = getHistory().stream().map(Task::getId).collect(Collectors.toList());
@@ -66,7 +66,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
     }
     private void load() throws ManagerSaveException {
         try {
-            String jsonTasks = taskClient.load(keyTasks);
+            String jsonTasks = taskClient.load(KEY_TASKS);
             ArrayList<Task> loadedTasks = gson.fromJson(jsonTasks, new TypeToken<List<Task>>() {}.getType());
             if (loadedTasks != null) {
                 for (Task task : loadedTasks) {
@@ -74,7 +74,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
                     prioritizedTasks.add(task);
                 }
             }
-            String jsonEpics = taskClient.load(keyEpics);
+            String jsonEpics = taskClient.load(KEY_EPICS);
             ArrayList<Epic> loadedEpics = gson.fromJson(jsonEpics, new TypeToken<List<Epic>>() {}.getType());
             if (loadedEpics != null) {
                 for (Epic epic : loadedEpics) {
@@ -82,7 +82,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
                 }
             }
 
-            String jsonSubtasks = taskClient.load(keySubtasks);
+            String jsonSubtasks = taskClient.load(KEY_SUBTASKS);
             ArrayList<Subtask> loadedSubtasks = gson.fromJson(jsonSubtasks, new TypeToken<List<Subtask>>() {}.getType());
             if (loadedSubtasks != null) {
                 for (Subtask subtask : loadedSubtasks) {
@@ -91,7 +91,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
                 }
             }
 
-            String jsonHistory = taskClient.load(keyHistory);
+            String jsonHistory = taskClient.load(KEY_HISTORY);
             ArrayList<Integer> loadedHistoryIds = gson.fromJson(jsonHistory, new TypeToken<List<Integer>>() {}.getType());
             if (loadedHistoryIds != null) {
                 for (Integer taskId : loadedHistoryIds) {

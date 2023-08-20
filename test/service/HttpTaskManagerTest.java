@@ -4,10 +4,7 @@ import client.KVTaskClient;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sun.net.httpserver.HttpServer;
-import manager.FileBackedTasksManager;
-import manager.HttpTaskManager;
-import manager.InMemoryHistoryManager;
-import manager.TaskService;
+import manager.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +28,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static service.EpicTest.taskManager;
 
-class HttpTaskManagerTest {
+class HttpTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     private static final int PORT = 8080;
     private HttpServer server;
 

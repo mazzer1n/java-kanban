@@ -11,10 +11,10 @@ import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     protected int nextId;
-    protected final HashMap<Integer, Subtask> subtasks;
+    protected final Map<Integer, Subtask> subtasks;
 
-    protected final HashMap<Integer, Epic> epics;
-    protected final HashMap<Integer, Task> tasks;
+    protected final Map<Integer, Epic> epics;
+    protected final Map<Integer, Task> tasks;
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
     protected TreeSet<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
@@ -28,25 +28,28 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     protected int generateId() {
-        return nextId++ + 1;
+        return ++nextId;
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        historyManager.add(subtasks.get(id));
-        return subtasks.get(id);
+        Subtask subtask = subtasks.get(id);
+        historyManager.add(subtask);
+        return subtask;
     }
 
     @Override
     public Task getTaskById(int id) {
-        historyManager.add(tasks.get(id));
-        return tasks.get(id);
+        Task task = tasks.get(id);
+        historyManager.add(task);
+        return task;
     }
 
     @Override
     public Epic getEpicById(int id) {
-        historyManager.add(epics.get(id));
-        return epics.get(id);
+        Epic epic = epics.get(id);
+        historyManager.add(epic);
+        return epic;
     }
 
     @Override
@@ -81,12 +84,13 @@ public class InMemoryTaskManager implements TaskManager {
         if (saved == null || subtasks.isEmpty()) {
             throw new ManagerUpdateException("Invalid subtask or subtasks list is empty");
         }
-        if (prioritizedTasks.size() != 1) checkOverlaps(subtask);
+        prioritizedTasks.remove(saved);
         saved.setName(subtask.getName());
         saved.setStatus(subtask.getStatus());
         saved.setDescription(subtask.getDescription());
         saved.setStartTime(subtask.getStartTime());
         saved.setDuration(subtask.getDuration());
+        prioritizedTasks.add(saved);
         final Epic epic = epics.get(subtask.getEpicId());
         updateEpicStatus(epic);
         updateEpicTime(epic);
@@ -98,12 +102,13 @@ public class InMemoryTaskManager implements TaskManager {
         if (saved == null || tasks.isEmpty()) {
             throw new ManagerUpdateException("Invalid task or tasks list is empty");
         }
-        if (prioritizedTasks.size() != 1) checkOverlaps(task);
+        prioritizedTasks.remove(saved);
         saved.setName(task.getName());
         saved.setStatus(task.getStatus());
         saved.setDescription(task.getDescription());
         saved.setStartTime(task.getStartTime());
         saved.setDuration(task.getDuration());
+        prioritizedTasks.add(saved);
     }
 
     @Override
@@ -137,8 +142,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epics.get(id);
 
         for (Integer subtaskId : epic.getSubtasksId()) {
-            prioritizedTasks.remove(subtasks.get(subtaskId));
-            subtasks.remove(subtaskId);
+            prioritizedTasks.remove(subtasks.remove(subtaskId));
             historyManager.remove(subtaskId);
         }
 
@@ -170,11 +174,9 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
-        epics.put(epic.getId(), epic);
     }
 
     protected void updateEpicTime(Epic epic) {
-        final int epicId = epic.getId();
         if (epic.getSubtasksId().isEmpty()) {
             epic.setStartTime(null);
             epic.setDuration(Duration.ZERO);
@@ -196,10 +198,10 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.setStartTime(subtask.getStartTime());
                 epic.setDuration(subtask.getDuration());
                 epic.setEndTime(subtask.getEndTime());
-            } else if (startTime.isAfter(subtask.getStartTime())) {
+            } else if (startTime.isAfter(subtask.getStartTime())) { //Время старта по умолчанию Instant.now()
                 epic.setStartTime(subtask.getStartTime());
                 epic.setDuration(duration.plus(subtask.getDuration()));
-            } else if (endTime.isBefore(subtask.getEndTime())) {
+            } else if (endTime.isBefore(subtask.getEndTime())) { // по умолчанию duration.zero, время конца всегда будет
                 epic.setEndTime(subtask.getEndTime());
                 epic.setDuration(duration.plus(subtask.getDuration()));
             } else {
@@ -230,22 +232,22 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     @Override
-    public ArrayList<Task> getTaskList() {
+    public List<Task> getTaskList() {
         return new ArrayList<>(tasks.values());
     }
 
     @Override
-    public ArrayList<Epic> getEpicList() {
+    public List<Epic> getEpicList() {
         return new ArrayList<>(epics.values());
     }
 
     @Override
-    public ArrayList<Subtask> getSubtaskList() {
+    public List<Subtask> getSubtaskList() {
         return new ArrayList<>(subtasks.values());
     }
 
     @Override
-    public ArrayList<Subtask> getSubtasksOfEpic(Epic epic) {
+    public List<Subtask> getSubtasksOfEpic(Epic epic) {
         final ArrayList<Subtask> subtasksOfEpic = new ArrayList<>();
         for (Subtask subtask : subtasks.values()) {
             if (subtask.getEpicId() == epic.getId())
@@ -321,6 +323,7 @@ public class InMemoryTaskManager implements TaskManager {
     private void removeAllTasks() {
         prioritizedTasks.removeIf(task -> !(task instanceof Subtask));
     }
+    // не очень понял про какие эпики речь? Это удаление из дерева, там нет эпиков
 
     private void removeAllSubtasks() {
         prioritizedTasks.removeIf(task -> task instanceof Subtask);
