@@ -13,7 +13,7 @@ public class KVTaskClient {
     private final String serverUrl;
     private final String apiToken;
 
-    public KVTaskClient(URL serverUrl)  {
+    public KVTaskClient(URL serverUrl) {
         this.serverUrl = String.valueOf(serverUrl);
         this.apiToken = register();
     }
@@ -39,23 +39,6 @@ public class KVTaskClient {
         }
     }
 
-    public void delete(String key) {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(serverUrl + "/delete/" + key + "?API_TOKEN=" + apiToken))
-                .DELETE()
-                .build();
-
-        try {
-            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-
-            if (response.statusCode() != 200) {
-                throw new ManagerSaveException("Ошибка удаления данных с сервера.");
-            }
-        } catch (IOException | InterruptedException e) {
-            throw new ManagerSaveException("Ошибка удаления данных с сервера.");
-        }
-    }
 
     public void put(String key, String json) {
         HttpClient client = HttpClient.newHttpClient();

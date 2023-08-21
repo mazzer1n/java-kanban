@@ -1,6 +1,7 @@
 package service;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import manager.HttpTaskManager;
 import manager.Managers;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,14 +13,17 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HttpTaskServerTest {
 
@@ -273,5 +277,41 @@ public class HttpTaskServerTest {
         assertEquals(200, getSubtasksResponse.statusCode());
     }
 
+    @Test
+    public void testGetTaskHistory() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest createTaskRequest = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/tasks/task"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("{\"title\": \"Тестовая задача\", \"description\": \"Тестовое описание\"}"))
+                .build();
+        HttpResponse<String> createTaskResponse = client.send(createTaskRequest, HttpResponse.BodyHandlers.ofString());
+        assertEquals(201, createTaskResponse.statusCode());
+        Gson gson = Managers.createCustomGson();
+        Task createdTask = gson.fromJson(createTaskResponse.body(), Task.class);
+        HttpRequest getTaskByIdRequest = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/tasks/task?id=" + createdTask.getId()))
+                .GET()
+                .build();
+        HttpResponse<String> getTaskByIdResponse = client.send(getTaskByIdRequest, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, getTaskByIdResponse.statusCode());
 
+        HttpRequest getTaskHistoryRequest = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/tasks/task/history"))
+                .GET()
+                .build();
+        HttpResponse<String> getTaskHistoryResponse = client.send(getTaskHistoryRequest, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, getTaskHistoryResponse.statusCode());
+        Type taskListType = new TypeToken<List<Task>>() {
+        }.getType();
+        List<Task> history = gson.fromJson(getTaskHistoryResponse.body(), taskListType);
+        assertNotNull(history);
+        assertTrue(history.stream().allMatch(Objects::nonNull));
+        assertTrue(history.stream().anyMatch(task -> Objects.equals(task.getId(), createdTask.getId())));
+        for (Task task : history) {
+            assertNotNull(task.getName(), "Заголовок задачи не должен быть пустым");
+            assertNotNull(task.getDescription(), "Описание задачи не должно быть пустым");
+
+        }
+    }
 }

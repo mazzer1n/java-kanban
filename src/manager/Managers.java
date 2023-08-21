@@ -3,8 +3,6 @@ package manager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.File;
-
 
 public class Managers {
     public static TaskManager getDefault() {
@@ -16,7 +14,7 @@ public class Managers {
     }
 
     public static TaskManager getFileBackedTaskManager(String path) {
-        return  new FileBackedTasksManager(path);
+        return new FileBackedTasksManager(path);
     }
 
     public static TaskManager getHttpTaskManager(String uri) {

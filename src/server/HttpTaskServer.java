@@ -56,7 +56,6 @@ public class HttpTaskServer {
 
         private final Gson gson;
         private final TaskManager taskManager;
-        private KVTaskClient kvTaskClient = new KVTaskClient(new URL("http://localhost:8080"));
 
         public TaskHandler(TaskManager taskManager) throws MalformedURLException {
             this.taskManager = taskManager;
@@ -75,6 +74,10 @@ public class HttpTaskServer {
             } else if (method.equals("GET") && path.equals("/tasks/")) {
                 List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
                 String response = gson.toJson(prioritizedTasks);
+                sendResponse(exchange, response);
+            } else if (method.equals("GET") && path.equals("/tasks/history")) {
+                List<Task> history = taskManager.getHistory();
+                String response = gson.toJson(history);
                 sendResponse(exchange, response);
             } else if (method.equals("GET") && path.equals("/tasks/subtask/")) {
                 List<Subtask> subtasks = taskManager.getSubtaskList();
@@ -149,28 +152,16 @@ public class HttpTaskServer {
                 if (path.equals("/tasks/task/")) {
                     InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                     Task newTask = gson.fromJson(reader, Task.class);
-
-
-                    kvTaskClient.put("task_" + newTask.getId(), gson.toJson(newTask));
-
                     taskManager.addTask(newTask);
                     sendResponse(exchange, "Задача успешно создана", HttpURLConnection.HTTP_OK);
                 } else if (path.equals("/tasks/subtask/")) {
                     InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                     Subtask newSubtask = gson.fromJson(reader, Subtask.class);
-
-
-                    kvTaskClient.put("subtask_" + newSubtask.getId(), gson.toJson(newSubtask));
-
                     taskManager.addSubtask(newSubtask);
                     sendResponse(exchange, "Подзадача успешно создана", HttpURLConnection.HTTP_OK);
                 } else if (path.equals("/tasks/epics/")) {
                     InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                     Epic newEpic = gson.fromJson(reader, Epic.class);
-
-
-                    kvTaskClient.put("epic_" + newEpic.getId(), gson.toJson(newEpic));
-
                     taskManager.addEpic(newEpic);
                     sendResponse(exchange, "Эпик успешно создан", HttpURLConnection.HTTP_OK);
                 } else {
@@ -179,27 +170,15 @@ public class HttpTaskServer {
             } else if (method.equals("DELETE")) {
                 if (path.startsWith("/tasks/task/?id=")) {
                     int taskId = parseFromPathIfEqual(path);
-
-
                     taskManager.deleteTaskById(taskId);
-                    kvTaskClient.delete("task_" + taskId);
-
                     sendResponse(exchange, "Задача успешно удалена", HttpURLConnection.HTTP_OK);
                 } else if (path.startsWith("/tasks/subtask/?id=")) {
                     int subtaskId = parseFromPathIfEqual(path);
-
-
                     taskManager.deleteSubtaskById(subtaskId);
-                    kvTaskClient.delete("subtask_" + subtaskId);
-
                     sendResponse(exchange, "Подзадача успешно удалена", HttpURLConnection.HTTP_OK);
                 } else if (path.startsWith("/tasks/epics/?id=")) {
                     int epicId = parseFromPathIfEqual(path);
-
-
                     taskManager.deleteEpicById(epicId);
-                    kvTaskClient.delete("epic_" + epicId);
-
                     sendResponse(exchange, "Эпик успешно удален", HttpURLConnection.HTTP_OK);
                 } else {
                     sendResponse(exchange, "Метод не поддерживается", HttpURLConnection.HTTP_BAD_METHOD);
